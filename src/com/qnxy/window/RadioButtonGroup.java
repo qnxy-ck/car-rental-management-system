@@ -3,6 +3,7 @@ package com.qnxy.window;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -18,6 +19,7 @@ public final class RadioButtonGroup<V> {
     private final V defaultSelected;
 
     private final ButtonGroup buttonGroup = new ButtonGroup();
+    private JRadioButton defaultRadioButton;
 
     /**
      * 创建单选按钮组
@@ -41,12 +43,21 @@ public final class RadioButtonGroup<V> {
         this.btnNameAndValueMap.forEach(this::initRadioBtn);
     }
 
+    /**
+     * 恢复默认选中的按钮
+     */
+    public void restoreSelection() {
+        Optional.ofNullable(this.defaultRadioButton)
+                .ifPresent(radioButton -> radioButton.setSelected(true));
+    }
+
     private void initRadioBtn(String buttonName, V v) {
         final JRadioButton radioButton = new JRadioButton(buttonName);
         radioButton.addActionListener(radioButtonAction());
 
         if (v.equals(defaultSelected)) {
             radioButton.setSelected(true);
+            this.defaultRadioButton = radioButton;
         }
 
         buttonGroup.add(radioButton);
