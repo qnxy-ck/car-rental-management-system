@@ -1,4 +1,4 @@
-package com.qnxy.window.admin;
+package com.qnxy.window;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
@@ -6,6 +6,8 @@ import java.awt.*;
 import java.util.List;
 
 /**
+ * 表格操作自定义
+ * 
  * @author Qnxy
  */
 public abstract class AdminOptTableCellEditor<T> extends DefaultCellEditor implements TableCellRenderer {

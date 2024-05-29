@@ -2,6 +2,7 @@ package com.qnxy.window.admin;
 
 import com.qnxy.common.data.PageInfo;
 import com.qnxy.common.data.ui.AdminTableData;
+import com.qnxy.window.AdminOptTableCellEditor;
 import com.qnxy.window.ChildPanelSupport;
 import com.qnxy.window.TablePanel;
 import com.qnxy.window.TablePanel.NameAndValue;
@@ -9,33 +10,38 @@ import com.qnxy.window.login.LoginPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.qnxy.window.TablePanel.DataInitType.INIT;
 
 /**
  * 管理员窗口
  *
  * @author Qnxy
  */
-public final class AdministratorPanel extends ChildPanelSupport {
+public final class AdministratorPanel extends ChildPanelSupport
+        implements BiFunction<Integer, TablePanel.DataInitType, PageInfo<AdminTableData>> {
 
-    private static final List<AdminTableData> userInfoList = new ArrayList<>();
+    private static final SecureRandom rand = new SecureRandom();
+    private static final List<AdminTableData> userInfoList = getUserInfoList();
 
-    // TODO 2024-05-28 临时数据 后续删除
-    static {
-        for (int i = 0; i < 20; i++) {
-            userInfoList.add(
-                    new AdminTableData(
-                            i,
-                            "username" + i,
-                            "carOwner" + i,
-                            "price" + i,
-                            "carColor" + i,
-                            i % 2 == 0,
-                            "leasedUser" + i
-                    )
-            );
-        }
+    private static List<AdminTableData> getUserInfoList() {
+        return Stream.generate(() -> new AdminTableData(
+                        0,
+                        "carModel " + rand.nextBoolean(),
+                        "carOwner",
+                        "price",
+                        "carColor",
+                        false,
+                        "leasedUser"
+                ))
+                .limit(16)
+                .collect(Collectors.toList());
 
     }
 
@@ -66,26 +72,7 @@ public final class AdministratorPanel extends ChildPanelSupport {
         add(topButtonPanel(), BorderLayout.NORTH);
 
         // 中间的表格
-        userInfoTablePanel = new TablePanel<>(
-                tableHeaderDataList,
-                () -> new PageInfo<>(userInfoList, 1, 15, 100),
-                () -> new PageInfo<>(userInfoList, 1, 15, 100),
-                () -> new PageInfo<>(userInfoList, 2, 15, 100)
-        );
-
-
-        // TODO 2024-05-28  示例
-        new Thread(() -> {
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            // 数据块查询数据
-            userInfoTablePanel.refreshTableData(new PageInfo<>(userInfoList, 2, 15, 100));
-
-        }).start();
+        userInfoTablePanel = new TablePanel<>(tableHeaderDataList, this);
 
         add(userInfoTablePanel, BorderLayout.CENTER);
 
@@ -112,9 +99,7 @@ public final class AdministratorPanel extends ChildPanelSupport {
             addActionListener(e -> carInformationEntry());
         }});
         optionPanel.add(new JButton("刷新列表") {{
-            addActionListener(e -> userInfoTablePanel.refreshTableData(
-                    new PageInfo<>(userInfoList, 1, 10, 100)
-            ));
+            addActionListener(e -> userInfoTablePanel.refreshTableData(INIT));
         }});
 
 
@@ -129,7 +114,7 @@ public final class AdministratorPanel extends ChildPanelSupport {
         new InformationEntryDialog(
                 ((Frame) getRootPane().getParent()),
                 it -> {
-                    JOptionPane.showMessageDialog(null, "录入成功");
+                    JOptionPane.showMessageDialog(this, "录入成功");
                     return true;
                 }
         );
@@ -159,8 +144,31 @@ public final class AdministratorPanel extends ChildPanelSupport {
         }
     }
 
-    private class AdminTableOpt extends AdminOptTableCellEditor<AdminTableData> {
 
+    /**
+     * 表格数据更新事件
+     */
+    @Override
+    public PageInfo<AdminTableData> apply(Integer currentPage, TablePanel.DataInitType dataInitType) {
+        switch (dataInitType) {
+            case INIT:
+                return new PageInfo<>(userInfoList, 1, 100);
+            case UP_PAGE:
+                if (currentPage <= 1) {
+                    JOptionPane.showMessageDialog(this, "已经是第一页了");
+                    return null;
+                } else {
+                    return new PageInfo<>(getUserInfoList(), 1, 100);
+                }
+            case NEXT_PAGE:
+                return new PageInfo<>(getUserInfoList(), 2, 100);
+        }
+
+        return null;
+    }
+
+
+    private class AdminTableOpt extends AdminOptTableCellEditor<AdminTableData> {
 
         @Override
         public void updateAction(AdminTableData data) {
@@ -176,7 +184,7 @@ public final class AdministratorPanel extends ChildPanelSupport {
 
         @Override
         public void deleteAction(AdminTableData data) {
-
+            JOptionPane.showMessageDialog(AdministratorPanel.this, "开发中");
         }
 
 

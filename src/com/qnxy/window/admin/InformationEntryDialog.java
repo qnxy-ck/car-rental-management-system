@@ -2,6 +2,7 @@ package com.qnxy.window.admin;
 
 import com.qnxy.common.data.ui.AdminTableData;
 import com.qnxy.window.LabelTextField;
+import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.RadioButtonGroup;
 
 import javax.swing.*;
@@ -146,29 +147,6 @@ public final class InformationEntryDialog extends JDialog {
                     adminTableData.getLeased(),
                     adminTableData::setLeased
             );
-
-
-//            final ButtonGroup buttonGroup = new ButtonGroup();
-//
-//            // 初始化单选框
-//            final List<JRadioButton> radioButtonList = Stream.of("否", "是")
-//                    .map(JRadioButton::new)
-//                    .peek(it -> {
-//                        // 为单选框设置事件, 如果选择内容为 是 则是否被租用 为true
-//                        it.addActionListener(e -> adminTableData.setLeased(e.getActionCommand().equals("是")));
-//                        buttonGroup.add(it);
-//                        add(it);
-//                    })
-//                    .collect(Collectors.toList());
-//
-//            // 设置第一个单选框为选中状态
-//            final JRadioButton jRadioButton = radioButtonList.get(0);
-//
-//            // radioButtonList 第一个元素为 否
-//            // 设置 adminTableData  是否被租用 默认为 false(未租用)
-//            // Tips: 如果设置为 true 和默认选择按钮不对应
-//            adminTableData.setLeased(false);
-//            buttonGroup.setSelected(jRadioButton.getModel(), true);
         }};
     }
 
@@ -179,34 +157,18 @@ public final class InformationEntryDialog extends JDialog {
         return new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 0)) {{
             setPreferredSize(new Dimension(400, 50));
 
-            add(new JButton("提交") {{
-                addActionListener(e -> {
-                    if (submitAction.apply(adminTableData)) {
-                        InformationEntryDialog.this.dispose();
-                    }
-                });
-            }});
-
-            add(new JButton("取消") {{
-                addActionListener(e -> InformationEntryDialog.this.dispose());
-            }});
-
-            add(new JButton("重置") {{
-                addActionListener(e -> {
-                    labelTextFieldInfo().forEach(it -> {
-                        if (isUpdate) {
-                            // 更新时重置输入框内容
-                            it.restoreDefaultText();
-                        } else {
-                            // 新增时清空输入框
-                            it.clearFieldValue();
+            new QuickListenerAdder(this)
+                    .add(new JButton("提交"), e -> {
+                        if (submitAction.apply(adminTableData)) {
+                            InformationEntryDialog.this.dispose();
                         }
+                    })
+                    .add(new JButton("取消"), e -> InformationEntryDialog.this.dispose())
+                    .add(new JButton("重置"), e -> {
+                        labelTextFieldInfo().forEach(LabelTextField::restoreDefaultText);
+                        radioButtonGroup.restoreSelection();
                     });
-                    radioButtonGroup.restoreSelection();
-                });
-            }});
         }};
     }
-
 
 }

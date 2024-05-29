@@ -5,7 +5,6 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -96,19 +95,10 @@ public class LabelTextField extends JPanel implements DocumentListener {
 
 
     /**
-     * 清空输入框内容
-     */
-    public void clearFieldValue() {
-        input.setText(null);
-    }
-
-    /**
      * 如果存在默认值的话, 恢复输入框默认值
      */
     public void restoreDefaultText() {
-        Optional.ofNullable(this.defaultValue)
-                .map(Objects::toString)
-                .ifPresent(input::setText);
+        input.setText(this.defaultValue == null ? null : this.defaultValue.toString());
     }
 
     @Override

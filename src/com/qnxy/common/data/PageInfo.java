@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * 分页信息
- * 
+ *
  * @author Qnxy
  */
 public class PageInfo<DATA> {
@@ -29,10 +29,10 @@ public class PageInfo<DATA> {
      */
     private final int total;
 
-    public PageInfo(List<DATA> records, int currentPage, int pageSize, int total) {
+    public PageInfo(List<DATA> records, int currentPage, int total) {
         this.records = records;
         this.currentPage = currentPage;
-        this.pageSize = pageSize;
+        this.pageSize = records.size();
         this.total = total;
     }
 
@@ -50,5 +50,15 @@ public class PageInfo<DATA> {
 
     public int getTotal() {
         return total;
+    }
+
+    @Override
+    public String toString() {
+        return "PageInfo{" +
+                "records=" + records +
+                ", currentPage=" + currentPage +
+                ", pageSize=" + pageSize +
+                ", total=" + total +
+                '}';
     }
 }

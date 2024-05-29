@@ -1,7 +1,6 @@
 package com.qnxy.window;
 
 import com.qnxy.common.data.PageInfo;
-import com.qnxy.window.admin.AdminOptTableCellEditor;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -12,46 +11,51 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * 自定义表格
  *
  * @author Qnxy
  */
-public class TablePanel<T> extends JPanel {
+public final class TablePanel<T> extends JPanel {
 
     /**
      * 表头信息
      */
     private final List<NameAndValue<T>> tableHeaderDataList;
     private final JTable table = new JTable();
-    private final Map<BottomLabelE, JLabel> bottomLabelJLabelMap = new LinkedHashMap<>();
-    private final Supplier<PageInfo<T>> initData;
-    private final Supplier<PageInfo<T>> upPage;
-    private final Supplier<PageInfo<T>> nextPage;
+
+    private final Map<JLabel, BiConsumer<JLabel, PageInfo<T>>> bottomLabelJLabelMap = new LinkedHashMap<JLabel, BiConsumer<JLabel, PageInfo<T>>>() {{
+        put(new JLabel("当前页: 1"), (label, pageInfo) -> label.setText("当前页: " + pageInfo.getCurrentPage()));
+        put(new JLabel("当前页数量: 0"), (label, pageInfo) -> label.setText("当前页: " + pageInfo.getPageSize()));
+        put(new JLabel("总页数: 0"), (label, pageInfo) -> label.setText("当前页: " + pageInfo.getTotal()));
+    }};
+
+    private final BiFunction<Integer, DataInitType, PageInfo<T>> dataGetFunc;
+
     /**
      * 表格数据
      */
-    private PageInfo<T> pageInfo = null;
+    private PageInfo<T> pageInfo;
 
     /**
      * 创建一个自定义表格
      *
      * @param tableHeaderDataList 当前表格表头信息和初始化数据方式
      */
-    public TablePanel(
-            List<NameAndValue<T>> tableHeaderDataList,
-            Supplier<PageInfo<T>> initData,
-            Supplier<PageInfo<T>> upPage,
-            Supplier<PageInfo<T>> nextPage
-    ) {
+    public TablePanel(List<NameAndValue<T>> tableHeaderDataList, BiFunction<Integer, DataInitType, PageInfo<T>> dataGetFunc) {
         this.tableHeaderDataList = tableHeaderDataList;
-        this.initData = initData;
-        this.upPage = upPage;
-        this.nextPage = nextPage;
+        this.dataGetFunc = dataGetFunc;
 
+        initTablePanel();
+        refreshTableData(DataInitType.INIT);
+    }
+
+
+    private void initTablePanel() {
         // 设置自定义 tableModel
         table.setModel(new TablePanelModel());
         // 设置表格为单行选中
@@ -59,62 +63,42 @@ public class TablePanel<T> extends JPanel {
         // 设置表格行高
         table.setRowHeight(30);
 
+        // 设置表格内容居中
         DefaultTableCellRenderer r = new DefaultTableCellRenderer();
         r.setHorizontalAlignment(JLabel.CENTER);
         table.setDefaultRenderer(Object.class, r);
 
+        // 设置表头不可拖动
+        table.getTableHeader().setReorderingAllowed(false);
+
         // 将表格设置到当前 JScrollPane 中
         final JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(1000, 500));
+        scrollPane.setPreferredSize(new Dimension(1200, 500));
 
         setLayout(new BorderLayout());
 
         add(scrollPane, BorderLayout.CENTER);
-        add(bottomPagePanel(new FlowLayout(FlowLayout.RIGHT, 15, 20)), BorderLayout.SOUTH);
-
+        add(bottomPagePanel(), BorderLayout.SOUTH);
     }
 
     /**
      * 底部信息按钮
      */
-    private JPanel bottomPagePanel(FlowLayout flowLayout) {
+    private JPanel bottomPagePanel() {
         return new JPanel() {{
-            setLayout(flowLayout);
+            setLayout(new FlowLayout(FlowLayout.RIGHT, 15, 20));
             setPreferredSize(new Dimension(0, 60));
 
-            add(new JButton("上一页") {{
-                addActionListener(e -> {
-                    final PageInfo<T> tPageInfo = TablePanel.this.upPage.get();
-                    TablePanel.this.refreshTableData(tPageInfo);
-                });
-            }});
+            new QuickListenerAdder(this)
+                    .add(new JButton("上一页"), e -> refreshTableData(DataInitType.UP_PAGE))
+                    .add(new JButton("下一页"), e -> refreshTableData(DataInitType.NEXT_PAGE));
 
-            add(new JButton("下一页") {{
-                addActionListener(e -> {
-                    final PageInfo<T> tPageInfo = TablePanel.this.nextPage.get();
-                    TablePanel.this.refreshTableData(tPageInfo);
-                });
-            }});
+            add(new JLabel("跳转到:"));
+            add(jumpTextField());
 
-//            add(new JLabel("跳转到:"));
-//            add(jumpTextField());
-
-
-            for (BottomLabelE value : BottomLabelE.values()) {
-                final JLabel jLabel = new JLabel(value.labelText + value.defaultNum);
-                bottomLabelJLabelMap.put(value, jLabel);
-                add(jLabel);
-            }
-
+            bottomLabelJLabelMap.keySet().forEach(this::add);
         }};
-
     }
-
-    private void updateBottomLabelText(BottomLabelE bottomLabelE, int num) {
-        Optional.ofNullable(this.bottomLabelJLabelMap.get(bottomLabelE))
-                .ifPresent(it -> it.setText(bottomLabelE.labelText + num));
-    }
-
 
     private JTextField jumpTextField() {
         final JTextField jumpTextField = new JTextField();
@@ -136,34 +120,42 @@ public class TablePanel<T> extends JPanel {
 
     /**
      * 刷新当前表格数据信息
-     *
-     * @param pageInfo 当前表格数据集合
      */
-    public void refreshTableData(PageInfo<T> pageInfo) {
-        this.pageInfo = pageInfo;
+    public void refreshTableData(DataInitType dataInitType) {
+        final Integer currentPage = Optional.ofNullable(this.pageInfo)
+                .map(PageInfo::getCurrentPage)
+                .orElse(0);
 
-        Optional.ofNullable(pageInfo)
-                .ifPresent(it -> {
-                    updateBottomLabelText(BottomLabelE.CURRENT_PAGE, it.getCurrentPage());
-                    updateBottomLabelText(BottomLabelE.PAGE_SIZE, it.getPageSize());
-                    updateBottomLabelText(BottomLabelE.TOTAL, it.getTotal());
-                });
+        final PageInfo<T> p = this.dataGetFunc.apply(currentPage, dataInitType);
+        if (p == null) {
+            return;
+        }
+
+        this.pageInfo = p;
+
+        this.bottomLabelJLabelMap.forEach((label, consumer) -> consumer.accept(label, p));
         table.updateUI();
-
     }
 
-    private enum BottomLabelE {
-        CURRENT_PAGE("当前页: ", 1),
-        PAGE_SIZE("当前页数量: ", 0),
-        TOTAL("总页数: ", 0);
+    /**
+     * 数据初始化以及获取方式
+     */
+    public enum DataInitType {
+        /**
+         * 数据初始化
+         */
+        INIT,
 
-        private final String labelText;
-        private final int defaultNum;
+        /**
+         * 上一页数据
+         */
+        UP_PAGE,
 
-        BottomLabelE(String labelText, int defaultNum) {
-            this.labelText = labelText;
-            this.defaultNum = defaultNum;
-        }
+        /**
+         * 下一页数据
+         */
+        NEXT_PAGE
+
     }
 
     /**
@@ -254,7 +246,4 @@ public class TablePanel<T> extends JPanel {
     }
 
 }
-
-
-
 
