@@ -36,7 +36,7 @@ public final class LoginPanel extends ChildPanelSupport {
     /**
      * 用户选择的登陆选项
      */
-    private LoginType selectedRadioType;
+    private LoginType selectedRadioType = LoginType.USER;
 
     @Override
     protected void initialization(ParentFrameScope parentFrameScope) {
@@ -89,7 +89,7 @@ public final class LoginPanel extends ChildPanelSupport {
         new RadioButtonGroup<>(
                 radioButtonPanel,
                 radioButtonInfoMap(),
-                LoginType.ADMINISTRATOR,
+                selectedRadioType,
                 it -> this.selectedRadioType = it
         );
 
