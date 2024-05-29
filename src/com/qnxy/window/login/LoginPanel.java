@@ -2,14 +2,16 @@ package com.qnxy.window.login;
 
 import com.qnxy.common.LoginType;
 import com.qnxy.window.ChildPanelSupport;
+import com.qnxy.window.LabelTextField;
+import com.qnxy.window.RadioButtonGroup;
 import com.qnxy.window.admin.AdministratorPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.qnxy.window.util.DiaLogUtil.showInProgress;
@@ -34,7 +36,7 @@ public final class LoginPanel extends ChildPanelSupport {
     /**
      * 用户选择的登陆选项
      */
-    private String selectedRadioText;
+    private LoginType selectedRadioType;
 
     @Override
     protected void initialization(ParentFrameScope parentFrameScope) {
@@ -69,37 +71,27 @@ public final class LoginPanel extends ChildPanelSupport {
     }
 
     /**
+     * 登陆选项单选按钮信息
+     */
+    private static Map<String, LoginType> radioButtonInfoMap() {
+        return Arrays.stream(LoginType.values())
+                .collect(Collectors.toMap(LoginType::getTypeText, Function.identity()));
+    }
+
+    /**
      * 选择框组件
      */
     private JPanel radioButtonPanel() {
-        final ButtonGroup buttonGroup = new ButtonGroup();
-
         final FlowLayout flowLayout = new FlowLayout();
         flowLayout.setHgap(40);
         final JPanel radioButtonPanel = new JPanel(flowLayout);
 
-        // 批量初始化单选框组件
-        final List<JRadioButton> radioButtonList = Arrays.stream(LoginType.values())
-                .map(LoginType::getTypeText)
-                .map(JRadioButton::new)
-                .peek(it -> {
-                    // 设置监听事件
-                    it.addActionListener(e -> selectedRadioText = e.getActionCommand());
-
-                    // 添加到按钮组, 使其可以在选择的时候排它(可以单选)
-                    buttonGroup.add(it);
-                    // 添加到选择框组件
-                    radioButtonPanel.add(it);
-
-                })
-                .collect(Collectors.toList());
-
-        final JRadioButton firstRadioButton = radioButtonList.get(0);
-
-        // 设置默认选中的单选框
-        selectedRadioText = firstRadioButton.getText();
-        buttonGroup.setSelected(firstRadioButton.getModel(), true);
-
+        new RadioButtonGroup<>(
+                radioButtonPanel,
+                radioButtonInfoMap(),
+                LoginType.ADMINISTRATOR,
+                it -> this.selectedRadioType = it
+        );
 
         return radioButtonPanel;
     }
@@ -132,13 +124,7 @@ public final class LoginPanel extends ChildPanelSupport {
         return e -> {
             printVal();
 
-            final Optional<LoginType> loginType = LoginType.typeTextOf(LoginPanel.this.selectedRadioText);
-            if (!loginType.isPresent()) {
-                JOptionPane.showMessageDialog(LoginPanel.this, "不存在的单选框错误", "提示", JOptionPane.ERROR_MESSAGE);
-            }
-
-            //noinspection OptionalGetWithoutIsPresent
-            switch (loginType.get()) {
+            switch (LoginPanel.this.selectedRadioType) {
                 case USER:
                     showInProgress(LoginPanel.this);
                     break;
@@ -162,7 +148,7 @@ public final class LoginPanel extends ChildPanelSupport {
 
 
     private void printVal() {
-        System.out.println("账户: " + username + " 密码: " + password + " 选择: " + selectedRadioText);
+        System.out.println("账户: " + username + " 密码: " + password + " 选择: " + selectedRadioType);
     }
 
 }
