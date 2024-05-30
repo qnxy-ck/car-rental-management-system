@@ -1,5 +1,8 @@
 package com.qnxy.common.data;
 
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 
 /**
@@ -7,6 +10,8 @@ import java.util.List;
  *
  * @author Qnxy
  */
+@Data
+@RequiredArgsConstructor
 public class PageInfo<DATA> {
 
     /**
@@ -36,29 +41,4 @@ public class PageInfo<DATA> {
         this.total = total;
     }
 
-    public List<DATA> getRecords() {
-        return records;
-    }
-
-    public int getCurrentPage() {
-        return currentPage;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public int getTotal() {
-        return total;
-    }
-
-    @Override
-    public String toString() {
-        return "PageInfo{" +
-                "records=" + records +
-                ", currentPage=" + currentPage +
-                ", pageSize=" + pageSize +
-                ", total=" + total +
-                '}';
-    }
 }

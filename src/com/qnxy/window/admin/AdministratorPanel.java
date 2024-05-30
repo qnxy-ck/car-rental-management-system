@@ -1,7 +1,7 @@
 package com.qnxy.window.admin;
 
 import com.qnxy.common.data.PageInfo;
-import com.qnxy.common.data.ui.AdminTableData;
+import com.qnxy.common.data.ui.RentalTableData;
 import com.qnxy.window.ChildPanelSupport;
 import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.SetInputValueDocumentListener;
@@ -9,6 +9,8 @@ import com.qnxy.window.TableCellOperate;
 import com.qnxy.window.common.LogoutPanel;
 import com.qnxy.window.common.TablePanel;
 import com.qnxy.window.common.TablePanel.NameAndValue;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,39 +27,39 @@ import java.util.stream.Stream;
  * @author Qnxy
  */
 public final class AdministratorPanel extends ChildPanelSupport
-        implements BiFunction<Integer, TablePanel.DataInitType, PageInfo<AdminTableData>> {
+        implements BiFunction<Integer, TablePanel.DataInitType, PageInfo<RentalTableData>> {
 
     private static final SecureRandom rand = new SecureRandom();
-    private static final List<AdminTableData> userInfoList = getUserInfoList();
+    private static final List<RentalTableData> userInfoList = getUserInfoList();
+    // 当前面板表格表头及对应值获取方式数据
+    private final List<NameAndValue<RentalTableData>> tableHeaderDataList = new ArrayList<NameAndValue<RentalTableData>>() {{
+        add(NameAndValue.of("编号", RentalTableData::getId));
+        add(NameAndValue.of("车型", RentalTableData::getCarModel));
+        add(NameAndValue.of("车主", RentalTableData::getCarOwner));
+        add(NameAndValue.of("价格(元/天)", RentalTableData::getPrice));
+        add(NameAndValue.of("颜色", RentalTableData::getCarColor));
+        add(NameAndValue.of("是否被租用", it -> it.getLeased() ? "是" : "否"));
+        add(NameAndValue.of("租用的用户", RentalTableData::getLeasedUser));
+        add(NameAndValue.of("操作", it -> new AdminTableOpt()));
+    }};
+    // 当前面板表格
+    private TablePanel<RentalTableData> userInfoTablePanel;
 
-    private static List<AdminTableData> getUserInfoList() {
-        return Stream.generate(() -> new AdminTableData(
+    private static List<RentalTableData> getUserInfoList() {
+        return Stream.generate(() -> new RentalTableData(
                         0,
                         "carModel " + rand.nextBoolean(),
                         "carOwner",
                         "price",
                         "carColor",
                         false,
-                        "leasedUser"
+                        "leasedUser",
+                        "我是详情"
                 ))
                 .limit(16)
                 .collect(Collectors.toList());
 
     }
-
-    // 当前面板表格表头及对应值获取方式数据
-    private final List<NameAndValue<AdminTableData>> tableHeaderDataList = new ArrayList<NameAndValue<AdminTableData>>() {{
-        add(NameAndValue.of("编号", AdminTableData::getId));
-        add(NameAndValue.of("车型", AdminTableData::getCarModel));
-        add(NameAndValue.of("车主", AdminTableData::getCarOwner));
-        add(NameAndValue.of("价格(元/天)", AdminTableData::getPrice));
-        add(NameAndValue.of("颜色", AdminTableData::getCarColor));
-        add(NameAndValue.of("是否被租用", it -> it.getLeased() ? "是" : "否"));
-        add(NameAndValue.of("租用的用户", AdminTableData::getLeasedUser));
-        add(NameAndValue.of("操作", it -> new AdminTableOpt()));
-    }};
-    // 当前面板表格
-    private TablePanel<AdminTableData> userInfoTablePanel;
     private String inputValue = "";
 
 
@@ -122,12 +124,11 @@ public final class AdministratorPanel extends ChildPanelSupport
 
     }
 
-
     /**
      * 表格数据更新事件
      */
     @Override
-    public PageInfo<AdminTableData> apply(Integer currentPage, TablePanel.DataInitType dataInitType) {
+    public PageInfo<RentalTableData> apply(Integer currentPage, TablePanel.DataInitType dataInitType) {
 
         switch (dataInitType) {
             case INIT:
@@ -147,32 +148,24 @@ public final class AdministratorPanel extends ChildPanelSupport
     }
 
 
+    @RequiredArgsConstructor
+    @Getter
     private enum AdminTableOptAction implements TableCellOperate.ActionName {
         UPDATE("更新"),
         DELETE("删除"),
-        DETAILS("详情"),
+        DETAILS("详情");
 
-        ;
-        private final String name;
-
-        AdminTableOptAction(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getActionName() {
-            return name;
-        }
+        private final String actionName;
     }
 
-    private class AdminTableOpt extends TableCellOperate<AdminTableData, AdminTableOptAction> {
+    private class AdminTableOpt extends TableCellOperate<RentalTableData, AdminTableOptAction> {
 
         public AdminTableOpt() {
             super(AdminTableOptAction.values());
         }
 
         @Override
-        public void execActionByType(AdminTableOptAction actionType, AdminTableData data) {
+        public void execActionByType(AdminTableOptAction actionType, RentalTableData data) {
             switch (actionType) {
                 case DELETE:
                 case DETAILS:

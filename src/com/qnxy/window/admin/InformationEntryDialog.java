@@ -1,6 +1,6 @@
 package com.qnxy.window.admin;
 
-import com.qnxy.common.data.ui.AdminTableData;
+import com.qnxy.common.data.ui.RentalTableData;
 import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.common.LabelTextField;
 import com.qnxy.window.common.RadioButtonGroup;
@@ -17,7 +17,7 @@ import java.util.function.Function;
  *
  * @author Qnxy
  */
-public final class InformationEntryDialog extends JDialog {
+final class InformationEntryDialog extends JDialog {
 
     /**
      * 租用单选按钮信息
@@ -30,7 +30,7 @@ public final class InformationEntryDialog extends JDialog {
     /**
      * 当前页面展示数据
      */
-    private final AdminTableData adminTableData;
+    private final RentalTableData rentalTableData;
     private final List<LabelTextField> labelTextFieldList = new ArrayList<>();
 
     /**
@@ -42,7 +42,7 @@ public final class InformationEntryDialog extends JDialog {
     /**
      * 提交的监听
      */
-    private final Function<AdminTableData, Boolean> submitAction;
+    private final Function<RentalTableData, Boolean> submitAction;
 
     private RadioButtonGroup<Boolean> radioButtonGroup;
 
@@ -50,28 +50,28 @@ public final class InformationEntryDialog extends JDialog {
     /**
      * 用于创建添加
      */
-    public InformationEntryDialog(Frame rootFrame, Function<AdminTableData, Boolean> submitAction) {
+    public InformationEntryDialog(Frame rootFrame, Function<RentalTableData, Boolean> submitAction) {
         this(rootFrame, null, submitAction);
     }
 
     /**
      * 用于创建更新
      *
-     * @param adminTableData 回显的数据
+     * @param rentalTableData 回显的数据
      */
-    public InformationEntryDialog(Frame rootFrame, AdminTableData adminTableData, Function<AdminTableData, Boolean> submitAction) {
+    public InformationEntryDialog(Frame rootFrame, RentalTableData rentalTableData, Function<RentalTableData, Boolean> submitAction) {
         super(rootFrame);
         this.submitAction = submitAction;
 
         // 更新时回显数据不能为空, 如果为空则为添加
-        if (adminTableData == null) {
+        if (rentalTableData == null) {
             this.isUpdate = false;
-            this.adminTableData = new AdminTableData();
+            this.rentalTableData = new RentalTableData();
             // 设置默认为未被租用
-            this.adminTableData.setLeased(false);
+            this.rentalTableData.setLeased(false);
         } else {
             this.isUpdate = true;
-            this.adminTableData = adminTableData;
+            this.rentalTableData = rentalTableData;
         }
 
 
@@ -116,13 +116,13 @@ public final class InformationEntryDialog extends JDialog {
         // 根据输入条件判断是否展示序号
         if (isUpdate) {
             // 修改时序号不可编辑
-            labelTextFieldList.add(new LabelTextField("序      号:", adminTableData.getId().toString(), false, null));
+            labelTextFieldList.add(new LabelTextField("序      号:", rentalTableData.getId().toString(), false, null));
         }
 
-        labelTextFieldList.add(new LabelTextField("车      型:", adminTableData.getCarModel(), adminTableData::setCarModel));
-        labelTextFieldList.add(new LabelTextField("车      主:", adminTableData.getCarOwner(), adminTableData::setCarOwner));
-        labelTextFieldList.add(new LabelTextField("价格(元/天):", adminTableData.getPrice(), adminTableData::setPrice));
-        labelTextFieldList.add(new LabelTextField("颜      色:", adminTableData.getCarColor(), adminTableData::setCarColor));
+        labelTextFieldList.add(new LabelTextField("车      型:", rentalTableData.getCarModel(), rentalTableData::setCarModel));
+        labelTextFieldList.add(new LabelTextField("车      主:", rentalTableData.getCarOwner(), rentalTableData::setCarOwner));
+        labelTextFieldList.add(new LabelTextField("价格(元/天):", rentalTableData.getPrice(), rentalTableData::setPrice));
+        labelTextFieldList.add(new LabelTextField("颜      色:", rentalTableData.getCarColor(), rentalTableData::setCarColor));
 
         return labelTextFieldList;
     }
@@ -144,8 +144,8 @@ public final class InformationEntryDialog extends JDialog {
             radioButtonGroup = new RadioButtonGroup<>(
                     this,
                     LEASED_STATUS_MAP,
-                    adminTableData.getLeased(),
-                    adminTableData::setLeased
+                    rentalTableData.getLeased(),
+                    rentalTableData::setLeased
             );
         }};
     }
@@ -159,7 +159,7 @@ public final class InformationEntryDialog extends JDialog {
 
             new QuickListenerAdder(this)
                     .add(new JButton("提交"), e -> {
-                        if (submitAction.apply(adminTableData)) {
+                        if (submitAction.apply(rentalTableData)) {
                             InformationEntryDialog.this.dispose();
                         }
                     })

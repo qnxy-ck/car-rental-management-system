@@ -1,5 +1,8 @@
 package com.qnxy.common;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -8,6 +11,8 @@ import java.util.Optional;
  *
  * @author Qnxy
  */
+@Getter
+@RequiredArgsConstructor
 public enum LoginType {
 
     USER("用户"),
@@ -16,13 +21,6 @@ public enum LoginType {
 
     private final String typeText;
 
-    LoginType(String typeText) {
-        this.typeText = typeText;
-    }
-
-    public String getTypeText() {
-        return typeText;
-    }
 
     public int getTypeNum() {
         return this.ordinal();
@@ -33,6 +31,6 @@ public enum LoginType {
         return Arrays.stream(values())
                 .filter(it -> it.getTypeText().equals(text))
                 .findFirst();
-        
+
     }
 }

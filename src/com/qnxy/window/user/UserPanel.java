@@ -1,7 +1,7 @@
 package com.qnxy.window.user;
 
 import com.qnxy.common.data.PageInfo;
-import com.qnxy.common.data.ui.AdminTableData;
+import com.qnxy.common.data.ui.RentalTableData;
 import com.qnxy.window.ChildPanelSupport;
 import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.SetInputValueDocumentListener;
@@ -24,14 +24,14 @@ import java.util.function.BiFunction;
  * @author Qnxy
  */
 public final class UserPanel extends ChildPanelSupport
-        implements BiFunction<Integer, TablePanel.DataInitType, PageInfo<AdminTableData>> {
+        implements BiFunction<Integer, TablePanel.DataInitType, PageInfo<RentalTableData>> {
     // 当前面板表格表头及对应值获取方式数据
-    private final List<TablePanel.NameAndValue<AdminTableData>> tableHeaderDataList = new ArrayList<TablePanel.NameAndValue<AdminTableData>>() {{
-        add(TablePanel.NameAndValue.of("编号", AdminTableData::getId));
-        add(TablePanel.NameAndValue.of("车型", AdminTableData::getCarModel));
-        add(TablePanel.NameAndValue.of("车主", AdminTableData::getCarOwner));
-        add(TablePanel.NameAndValue.of("价格(元/天)", AdminTableData::getPrice));
-        add(TablePanel.NameAndValue.of("颜色", AdminTableData::getCarColor));
+    private final List<TablePanel.NameAndValue<RentalTableData>> tableHeaderDataList = new ArrayList<TablePanel.NameAndValue<RentalTableData>>() {{
+        add(TablePanel.NameAndValue.of("编号", RentalTableData::getId));
+        add(TablePanel.NameAndValue.of("车型", RentalTableData::getCarModel));
+        add(TablePanel.NameAndValue.of("车主", RentalTableData::getCarOwner));
+        add(TablePanel.NameAndValue.of("价格(元/天)", RentalTableData::getPrice));
+        add(TablePanel.NameAndValue.of("颜色", RentalTableData::getCarColor));
         add(TablePanel.NameAndValue.of("是否被租用", it -> it.getLeased() ? "是" : "否"));
         add(TablePanel.NameAndValue.of("操作", it -> new UserTableOpt()));
     }};
@@ -43,7 +43,7 @@ public final class UserPanel extends ChildPanelSupport
 
     private boolean allOrRent = true;
     private String inputValue = "";
-    private TablePanel<AdminTableData> userInfoTablePanel;
+    private TablePanel<RentalTableData> userInfoTablePanel;
 
 
     @Override
@@ -99,26 +99,28 @@ public final class UserPanel extends ChildPanelSupport
     }
 
     @Override
-    public PageInfo<AdminTableData> apply(Integer integer, TablePanel.DataInitType dataInitType) {
+    public PageInfo<RentalTableData> apply(Integer integer, TablePanel.DataInitType dataInitType) {
 
-        ArrayList<AdminTableData> objects = new ArrayList<>();
-        objects.add(new AdminTableData(
+        ArrayList<RentalTableData> objects = new ArrayList<>();
+        objects.add(new RentalTableData(
                 1,
                 "C",
                 "C1",
                 "C2",
                 "C3",
                 true,
-                "C4"
+                "C4",
+                "我是详情"
         ));
-        objects.add(new AdminTableData(
+        objects.add(new RentalTableData(
                 2,
                 "C",
                 "C2",
                 "C2",
                 "Cd3",
                 false,
-                "C4"
+                "C4",
+                "我是详情2"
         ));
         return new PageInfo<>(objects, 1, 200);
     }
@@ -138,7 +140,7 @@ public final class UserPanel extends ChildPanelSupport
         }
     }
 
-    private class UserTableOpt extends TableCellOperate<AdminTableData, UserTableOptAction> {
+    private class UserTableOpt extends TableCellOperate<RentalTableData, UserTableOptAction> {
 
         public UserTableOpt() {
             super(UserTableOptAction.values());
@@ -146,7 +148,7 @@ public final class UserPanel extends ChildPanelSupport
 
 
         @Override
-        public void execActionByType(UserTableOptAction actionType, AdminTableData data) {
+        public void execActionByType(UserTableOptAction actionType, RentalTableData data) {
             JOptionPane.showMessageDialog(UserPanel.this, actionType.getActionName() + "开发中");
         }
 

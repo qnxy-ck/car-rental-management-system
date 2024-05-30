@@ -3,6 +3,7 @@ package com.qnxy.window.common;
 import com.qnxy.common.data.PageInfo;
 import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.TableCellOperate;
+import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -168,14 +169,10 @@ public final class TablePanel<T> extends JPanel {
      *
      * @param <T>
      */
+    @RequiredArgsConstructor
     public static class NameAndValue<T> {
         private final String tableName;
         private final Function<T, Object> tableValueFunction;
-
-        private NameAndValue(String tableName, Function<T, Object> tableValueFunction) {
-            this.tableName = tableName;
-            this.tableValueFunction = tableValueFunction;
-        }
 
         public static <T> NameAndValue<T> of(String tableName, Function<T, Object> tableValueFunction) {
             return new NameAndValue<>(tableName, tableValueFunction);
