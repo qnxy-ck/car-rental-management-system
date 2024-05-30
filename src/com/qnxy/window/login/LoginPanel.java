@@ -2,6 +2,7 @@ package com.qnxy.window.login;
 
 import com.qnxy.common.LoginType;
 import com.qnxy.window.ChildPanelSupport;
+import com.qnxy.window.TestSource;
 import com.qnxy.window.admin.AdministratorPanel;
 import com.qnxy.window.common.LabelTextField;
 import com.qnxy.window.common.RadioButtonGroup;
@@ -122,7 +123,15 @@ public final class LoginPanel extends ChildPanelSupport {
      */
     private ActionListener loginActionListener() {
         return e -> {
-            printVal();
+            if (!TestSource.login(LoginPanel.this.selectedRadioType, this.username, this.password)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "账号或密码错误, 登陆失败!",
+                        "登陆提示",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
 
             switch (LoginPanel.this.selectedRadioType) {
                 case USER:

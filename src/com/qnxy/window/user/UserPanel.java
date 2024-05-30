@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+import static com.qnxy.window.TestSource.getUserInfoList;
+
 /**
  * 用户管理面板
  *
@@ -44,7 +46,6 @@ public final class UserPanel extends ChildPanelSupport
     private boolean allOrRent = true;
     private String inputValue = "";
     private TablePanel<RentalTableData> userInfoTablePanel;
-
 
     @Override
     protected void initialization(ParentFrameScope parentFrameScope) {
@@ -100,29 +101,7 @@ public final class UserPanel extends ChildPanelSupport
 
     @Override
     public PageInfo<RentalTableData> apply(Integer integer, TablePanel.DataInitType dataInitType) {
-
-        ArrayList<RentalTableData> objects = new ArrayList<>();
-        objects.add(new RentalTableData(
-                1,
-                "C",
-                "C1",
-                "C2",
-                "C3",
-                true,
-                "C4",
-                "我是详情"
-        ));
-        objects.add(new RentalTableData(
-                2,
-                "C",
-                "C2",
-                "C2",
-                "Cd3",
-                false,
-                "C4",
-                "我是详情2"
-        ));
-        return new PageInfo<>(objects, 1, 200);
+        return new PageInfo<>(getUserInfoList(), 1, 200);
     }
 
     private enum UserTableOptAction implements TableCellOperate.ActionName {

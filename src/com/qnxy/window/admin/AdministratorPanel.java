@@ -14,12 +14,11 @@ import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static com.qnxy.window.TestSource.getUserInfoList;
 
 /**
  * 管理员窗口
@@ -29,8 +28,6 @@ import java.util.stream.Stream;
 public final class AdministratorPanel extends ChildPanelSupport
         implements BiFunction<Integer, TablePanel.DataInitType, PageInfo<RentalTableData>> {
 
-    private static final SecureRandom rand = new SecureRandom();
-    private static final List<RentalTableData> userInfoList = getUserInfoList();
     // 当前面板表格表头及对应值获取方式数据
     private final List<NameAndValue<RentalTableData>> tableHeaderDataList = new ArrayList<NameAndValue<RentalTableData>>() {{
         add(NameAndValue.of("编号", RentalTableData::getId));
@@ -45,21 +42,7 @@ public final class AdministratorPanel extends ChildPanelSupport
     // 当前面板表格
     private TablePanel<RentalTableData> userInfoTablePanel;
 
-    private static List<RentalTableData> getUserInfoList() {
-        return Stream.generate(() -> new RentalTableData(
-                        0,
-                        "carModel " + rand.nextBoolean(),
-                        "carOwner",
-                        "price",
-                        "carColor",
-                        false,
-                        "leasedUser",
-                        "我是详情"
-                ))
-                .limit(16)
-                .collect(Collectors.toList());
 
-    }
     private String inputValue = "";
 
 
@@ -132,7 +115,7 @@ public final class AdministratorPanel extends ChildPanelSupport
 
         switch (dataInitType) {
             case INIT:
-                return new PageInfo<>(userInfoList, 1, 100);
+                return new PageInfo<>(getUserInfoList(), 1, 100);
             case UP_PAGE:
                 if (currentPage <= 1) {
                     JOptionPane.showMessageDialog(this, "已经是第一页了");
