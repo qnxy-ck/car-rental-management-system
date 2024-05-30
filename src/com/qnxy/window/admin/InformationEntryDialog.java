@@ -84,7 +84,7 @@ final class InformationEntryDialog extends JDialog {
     private void initDialog() {
         setLayout(new BorderLayout());
         // 设置当前窗口大小
-        setSize(new Dimension(400, isUpdate ? 520 : 480));
+        setSize(new Dimension(400, getInputFieldHeight() + 170));
         // 设置窗口居中
         setLocationRelativeTo(null);
         // 窗口大小不可修改
@@ -101,6 +101,13 @@ final class InformationEntryDialog extends JDialog {
         add(bottomButtonPanel(), BorderLayout.SOUTH);
 
         setVisible(true);
+    }
+
+    /**
+     * 获取输入框的总高度
+     */
+    private int getInputFieldHeight() {
+        return this.labelTextFieldInfo().size() * 70;
     }
 
 
@@ -123,6 +130,7 @@ final class InformationEntryDialog extends JDialog {
         labelTextFieldList.add(new LabelTextField("车      主:", rentalTableData.getCarOwner(), rentalTableData::setCarOwner));
         labelTextFieldList.add(new LabelTextField("价格(元/天):", rentalTableData.getPrice(), rentalTableData::setPrice));
         labelTextFieldList.add(new LabelTextField("颜      色:", rentalTableData.getCarColor(), rentalTableData::setCarColor));
+        labelTextFieldList.add(new LabelTextField("详      情:", rentalTableData.getDetails(), rentalTableData::setDetails));
 
         return labelTextFieldList;
     }
@@ -134,10 +142,12 @@ final class InformationEntryDialog extends JDialog {
         final FlowLayout flowLayout = new FlowLayout(FlowLayout.CENTER, 20, 30);
 
         return new JPanel(flowLayout) {{
-            setPreferredSize(new Dimension(400, isUpdate ? 390 : 350));
+            final List<LabelTextField> labelTextFields = labelTextFieldInfo();
+
+            setPreferredSize(new Dimension(400, getInputFieldHeight() + 60));
 
             // 将输入框添加到面板
-            labelTextFieldInfo().forEach(this::add);
+            labelTextFields.forEach(this::add);
 
             add(new JLabel("是否已租用:"));
             // 是否已租用单选按钮
