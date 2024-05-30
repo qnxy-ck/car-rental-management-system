@@ -1,5 +1,7 @@
-package com.qnxy.window;
+package com.qnxy.window.common;
 
+
+import com.qnxy.window.SetInputValueDocumentListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +27,10 @@ public class LabelTextField extends JPanel {
      */
     private final JTextField input;
 
+    /**
+     * 输入框默认值
+     * 可用于恢复默认使用
+     */
     private final Object defaultValue;
 
 

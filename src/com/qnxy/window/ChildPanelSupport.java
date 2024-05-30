@@ -16,7 +16,7 @@ public abstract class ChildPanelSupport extends JPanel {
         initialization(new ParentFrameScope());
     }
 
-    protected void removeThisAndAdd(ChildPanelSupport addComponent) {
+    public void removeThisAndAdd(ChildPanelSupport addComponent) {
         rootFrame.remove(ChildPanelSupport.this);
         rootFrame.addComponent(addComponent);
     }

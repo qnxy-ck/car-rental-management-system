@@ -1,6 +1,8 @@
-package com.qnxy.window;
+package com.qnxy.window.common;
 
 import com.qnxy.common.data.PageInfo;
+import com.qnxy.window.QuickListenerAdder;
+import com.qnxy.window.TableCellOperate;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -161,6 +163,8 @@ public final class TablePanel<T> extends JPanel {
 
     /**
      * 表格表头数据和对应数据初始化方式
+     * <p>
+     * 如果表头中需要添加自定义按钮, 则 Function<T, Object> tableValueFunction 中 Object 类应实现 {@link TableCellOperate} 类
      *
      * @param <T>
      */

@@ -2,9 +2,9 @@ package com.qnxy.window.login;
 
 import com.qnxy.common.LoginType;
 import com.qnxy.window.ChildPanelSupport;
-import com.qnxy.window.LabelTextField;
-import com.qnxy.window.RadioButtonGroup;
 import com.qnxy.window.admin.AdministratorPanel;
+import com.qnxy.window.common.LabelTextField;
+import com.qnxy.window.common.RadioButtonGroup;
 import com.qnxy.window.user.UserPanel;
 
 import javax.swing.*;
@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.qnxy.window.util.DiaLogUtil.showInProgress;
 
 /**
  * 用户登录窗口
@@ -143,7 +142,7 @@ public final class LoginPanel extends ChildPanelSupport {
         return e -> {
             printVal();
 
-            showInProgress(LoginPanel.this);
+            JOptionPane.showMessageDialog(this, "待实现!");
         };
     }
 

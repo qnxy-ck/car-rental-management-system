@@ -1,4 +1,4 @@
-package com.qnxy.window;
+package com.qnxy.window.common;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;

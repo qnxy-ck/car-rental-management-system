@@ -1,9 +1,9 @@
 package com.qnxy.window.admin;
 
 import com.qnxy.common.data.ui.AdminTableData;
-import com.qnxy.window.LabelTextField;
 import com.qnxy.window.QuickListenerAdder;
-import com.qnxy.window.RadioButtonGroup;
+import com.qnxy.window.common.LabelTextField;
+import com.qnxy.window.common.RadioButtonGroup;
 
 import javax.swing.*;
 import java.awt.*;

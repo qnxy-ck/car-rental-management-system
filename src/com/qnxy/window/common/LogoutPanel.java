@@ -1,16 +1,19 @@
-package com.qnxy.window;
+package com.qnxy.window.common;
 
+import com.qnxy.window.ChildPanelSupport;
 import com.qnxy.window.login.LoginPanel;
 
 import javax.swing.*;
 import java.awt.*;
 
 /**
+ * 退出登录按钮及退出响应的事件
+ * 
  * @author Qnxy
  */
 public class LogoutPanel extends JPanel {
 
-    private ChildPanelSupport parent;
+    private final ChildPanelSupport parent;
 
     public LogoutPanel(ChildPanelSupport parent) {
         super(new FlowLayout(FlowLayout.RIGHT, 15, 20));
