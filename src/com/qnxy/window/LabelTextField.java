@@ -2,11 +2,8 @@ package com.qnxy.window;
 
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * 输入框组件
@@ -16,7 +13,7 @@ import java.util.function.Consumer;
  *
  * @author Qnxy
  */
-public class LabelTextField extends JPanel implements DocumentListener {
+public class LabelTextField extends JPanel {
 
     /**
      * 输入框前提示标签
@@ -28,27 +25,22 @@ public class LabelTextField extends JPanel implements DocumentListener {
      */
     private final JTextField input;
 
-    /**
-     * 输入框内容变更事件调用接口
-     */
-    private final Consumer<String> valueSet;
-
     private final Object defaultValue;
 
 
-    public LabelTextField(String labelName, Consumer<String> valueSet) {
+    public LabelTextField(String labelName, SetInputValueDocumentListener valueSet) {
         this(labelName, null, true, false, valueSet);
     }
 
-    public LabelTextField(String labelName, boolean isPassword, Consumer<String> valueSet) {
+    public LabelTextField(String labelName, boolean isPassword, SetInputValueDocumentListener valueSet) {
         this(labelName, null, true, isPassword, valueSet);
     }
 
-    public LabelTextField(String labelName, Object defaultValue, boolean editable, Consumer<String> valueSet) {
+    public LabelTextField(String labelName, Object defaultValue, boolean editable, SetInputValueDocumentListener valueSet) {
         this(labelName, defaultValue, editable, false, valueSet);
     }
 
-    public LabelTextField(String labelName, Object defaultValue, Consumer<String> valueSet) {
+    public LabelTextField(String labelName, Object defaultValue, SetInputValueDocumentListener valueSet) {
         this(labelName, defaultValue, true, false, valueSet);
     }
 
@@ -60,14 +52,13 @@ public class LabelTextField extends JPanel implements DocumentListener {
      * @param isPassword 是否为密码输入框
      * @param valueSet   输入框内容变更事件调用接口, 将输入的值传递给调用者
      */
-    public LabelTextField(String labelName, Object defaultValue, boolean editable, boolean isPassword, Consumer<String> valueSet) {
+    public LabelTextField(String labelName, Object defaultValue, boolean editable, boolean isPassword, SetInputValueDocumentListener valueSet) {
         this.label = new JLabel(labelName);
         this.input = isPassword ? new JPasswordField() : new JTextField();
-        this.valueSet = valueSet;
         this.defaultValue = defaultValue;
 
         // 监听输入框的输入更新事件
-        input.getDocument().addDocumentListener(this);
+        input.getDocument().addDocumentListener(valueSet);
 
         input.setText(Optional.ofNullable(defaultValue).orElse("").toString());
         input.setEditable(editable);
@@ -101,21 +92,4 @@ public class LabelTextField extends JPanel implements DocumentListener {
         input.setText(this.defaultValue == null ? null : this.defaultValue.toString());
     }
 
-    @Override
-    public void insertUpdate(DocumentEvent e) {
-        // 当向输入框输入内容时, 会调用该方法
-        Optional.ofNullable(this.valueSet)
-                .ifPresent(it -> it.accept(input.getText()));
-    }
-
-    @Override
-    public void removeUpdate(DocumentEvent e) {
-        // 删除时调用
-        Optional.ofNullable(this.valueSet)
-                .ifPresent(it -> it.accept(input.getText()));
-    }
-
-    @Override
-    public void changedUpdate(DocumentEvent e) {
-    }
 }

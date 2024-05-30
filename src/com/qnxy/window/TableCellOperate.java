@@ -7,31 +7,32 @@ import java.util.List;
 
 /**
  * 表格操作自定义
- * 
+ *
  * @author Qnxy
  */
-public abstract class AdminOptTableCellEditor<T> extends DefaultCellEditor implements TableCellRenderer {
+public abstract class TableCellOperate<T, TYPE extends Enum<TYPE> & TableCellOperate.ActionName> extends DefaultCellEditor implements TableCellRenderer {
 
 
     private final JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 2));
 
     private List<T> dataList;
     private T data;
+    private TYPE[] actionTypes;
 
-    public AdminOptTableCellEditor() {
+    public TableCellOperate(TYPE[] actionTypes) {
         super(new JTextField());
+        this.actionTypes = actionTypes;
 
         setClickCountToStart(1);
 
-        panel.add(new JButton("编辑") {{
-            addActionListener(e -> updateAction(data));
-            setPreferredSize(new Dimension(70, 26));
-        }});
+        for (TYPE actionType : actionTypes) {
+            final JButton b = new JButton(actionType.getActionName());
+            b.setPreferredSize(new Dimension(69, 26));
 
-        panel.add(new JButton("删除") {{
-            addActionListener(e -> deleteAction(data));
-            setPreferredSize(new Dimension(70, 26));
-        }});
+            b.addActionListener(e -> this.execActionByType(actionType, data));
+            panel.add(b);
+        }
+
     }
 
     @Override
@@ -50,8 +51,17 @@ public abstract class AdminOptTableCellEditor<T> extends DefaultCellEditor imple
         dataList = records;
     }
 
-    public abstract void updateAction(T data);
+    public int getWidth() {
+        return actionTypes.length * 55;
+    }
 
-    public abstract void deleteAction(T data);
+    public abstract void execActionByType(TYPE actionType, T data);
+
+
+    public interface ActionName {
+
+        String getActionName();
+
+    }
 
 }

@@ -5,6 +5,7 @@ import com.qnxy.window.ChildPanelSupport;
 import com.qnxy.window.LabelTextField;
 import com.qnxy.window.RadioButtonGroup;
 import com.qnxy.window.admin.AdministratorPanel;
+import com.qnxy.window.user.UserPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -126,7 +127,7 @@ public final class LoginPanel extends ChildPanelSupport {
 
             switch (LoginPanel.this.selectedRadioType) {
                 case USER:
-                    showInProgress(LoginPanel.this);
+                    super.removeThisAndAdd(new UserPanel());
                     break;
                 case ADMINISTRATOR:
                     super.removeThisAndAdd(new AdministratorPanel());

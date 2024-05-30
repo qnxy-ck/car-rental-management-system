@@ -30,8 +30,8 @@ public final class TablePanel<T> extends JPanel {
 
     private final Map<JLabel, BiConsumer<JLabel, PageInfo<T>>> bottomLabelJLabelMap = new LinkedHashMap<JLabel, BiConsumer<JLabel, PageInfo<T>>>() {{
         put(new JLabel("当前页: 1"), (label, pageInfo) -> label.setText("当前页: " + pageInfo.getCurrentPage()));
-        put(new JLabel("当前页数量: 0"), (label, pageInfo) -> label.setText("当前页: " + pageInfo.getPageSize()));
-        put(new JLabel("总页数: 0"), (label, pageInfo) -> label.setText("当前页: " + pageInfo.getTotal()));
+        put(new JLabel("当前页数量: 0"), (label, pageInfo) -> label.setText("当前页数量: " + pageInfo.getPageSize()));
+        put(new JLabel("总页数: 0"), (label, pageInfo) -> label.setText("总页数: " + pageInfo.getTotal()));
     }};
 
     private final BiFunction<Integer, DataInitType, PageInfo<T>> dataGetFunc;
@@ -51,7 +51,7 @@ public final class TablePanel<T> extends JPanel {
         this.dataGetFunc = dataGetFunc;
 
         initTablePanel();
-        refreshTableData(DataInitType.INIT);
+        invokeDataGetFun(DataInitType.INIT);
     }
 
 
@@ -90,8 +90,8 @@ public final class TablePanel<T> extends JPanel {
             setPreferredSize(new Dimension(0, 60));
 
             new QuickListenerAdder(this)
-                    .add(new JButton("上一页"), e -> refreshTableData(DataInitType.UP_PAGE))
-                    .add(new JButton("下一页"), e -> refreshTableData(DataInitType.NEXT_PAGE));
+                    .add(new JButton("上一页"), e -> invokeDataGetFun(DataInitType.UP_PAGE))
+                    .add(new JButton("下一页"), e -> invokeDataGetFun(DataInitType.NEXT_PAGE));
 
             add(new JLabel("跳转到:"));
             add(jumpTextField());
@@ -118,22 +118,23 @@ public final class TablePanel<T> extends JPanel {
         return jumpTextField;
     }
 
-    /**
-     * 刷新当前表格数据信息
-     */
-    public void refreshTableData(DataInitType dataInitType) {
+    private void invokeDataGetFun(DataInitType dataInitType) {
         final Integer currentPage = Optional.ofNullable(this.pageInfo)
                 .map(PageInfo::getCurrentPage)
                 .orElse(0);
 
         final PageInfo<T> p = this.dataGetFunc.apply(currentPage, dataInitType);
-        if (p == null) {
-            return;
+        if (p != null) {
+            this.pageInfo = p;
+            refreshTableData(p);
         }
+    }
 
-        this.pageInfo = p;
-
-        this.bottomLabelJLabelMap.forEach((label, consumer) -> consumer.accept(label, p));
+    /**
+     * 刷新当前表格数据信息
+     */
+    public void refreshTableData(PageInfo<T> pageInfo) {
+        this.bottomLabelJLabelMap.forEach((label, consumer) -> consumer.accept(label, pageInfo));
         table.updateUI();
     }
 
@@ -227,15 +228,15 @@ public final class TablePanel<T> extends JPanel {
                     .apply(t);
             final TableColumn c = table.getColumnModel().getColumn(columnIndex);
 
-            if (apply instanceof AdminOptTableCellEditor) {
+            if (apply instanceof TableCellOperate) {
                 if (pageInfo != null) {
                     //noinspection unchecked
-                    ((AdminOptTableCellEditor<T>) apply).setData(pageInfo.getRecords());
+                    ((TableCellOperate<T, ?>) apply).setData(pageInfo.getRecords());
                 }
 
                 c.setCellRenderer((TableCellRenderer) apply);
                 c.setCellEditor((TableCellEditor) apply);
-                c.setPreferredWidth(110);
+                c.setPreferredWidth(((TableCellOperate<?, ?>) apply).getWidth());
                 return null;
             }
 

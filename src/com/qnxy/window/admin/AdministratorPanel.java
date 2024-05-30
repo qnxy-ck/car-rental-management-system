@@ -2,11 +2,8 @@ package com.qnxy.window.admin;
 
 import com.qnxy.common.data.PageInfo;
 import com.qnxy.common.data.ui.AdminTableData;
-import com.qnxy.window.AdminOptTableCellEditor;
-import com.qnxy.window.ChildPanelSupport;
-import com.qnxy.window.TablePanel;
+import com.qnxy.window.*;
 import com.qnxy.window.TablePanel.NameAndValue;
-import com.qnxy.window.login.LoginPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,8 +13,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.qnxy.window.TablePanel.DataInitType.INIT;
 
 /**
  * 管理员窗口
@@ -58,6 +53,7 @@ public final class AdministratorPanel extends ChildPanelSupport
     }};
     // 当前面板表格
     private TablePanel<AdminTableData> userInfoTablePanel;
+    private String inputValue = "";
 
 
     @Override
@@ -82,26 +78,26 @@ public final class AdministratorPanel extends ChildPanelSupport
      * 顶部按钮面板
      */
     private JPanel topButtonPanel() {
-        final FlowLayout flowLayout = new FlowLayout(FlowLayout.RIGHT, 15, 20);
         final JPanel panel = new JPanel(new BorderLayout());
         panel.setPreferredSize(new Dimension(0, 70));
 
         // 退出按钮
-        panel.add(topLogoutPanel(flowLayout), BorderLayout.WEST);
+        panel.add(new LogoutPanel(this), BorderLayout.WEST);
 
         // 其他操作
-        final JPanel optionPanel = new JPanel(flowLayout);
+        final JPanel optionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 20));
+
+        // 查询
         final JTextField textField = new JTextField();
         textField.setPreferredSize(new Dimension(200, 30));
-        optionPanel.add(textField);
-        optionPanel.add(new JButton("查询"));
-        optionPanel.add(new JButton("汽车信息录入") {{
-            addActionListener(e -> carInformationEntry());
-        }});
-        optionPanel.add(new JButton("刷新列表") {{
-            addActionListener(e -> userInfoTablePanel.refreshTableData(INIT));
-        }});
+        textField.getDocument().addDocumentListener((SetInputValueDocumentListener) inputValue -> this.inputValue = inputValue);
 
+        optionPanel.add(textField);
+
+        new QuickListenerAdder(optionPanel)
+                .add(new JButton("查询"), e -> JOptionPane.showMessageDialog(this, "查询内容为: " + this.inputValue + "\n\n查询功能实现中\n"))
+                .add(new JButton("汽车信息录入"), e -> carInformationEntry())
+                .add(new JButton("刷新列表"), e -> JOptionPane.showMessageDialog(this, "刷新列表未实现"));
 
         panel.add(optionPanel, BorderLayout.EAST);
         return panel;
@@ -112,7 +108,7 @@ public final class AdministratorPanel extends ChildPanelSupport
      */
     private void carInformationEntry() {
         new InformationEntryDialog(
-                ((Frame) getRootPane().getParent()),
+                (Frame) getRootPane().getParent(),
                 it -> {
                     JOptionPane.showMessageDialog(this, "录入成功");
                     return true;
@@ -121,35 +117,13 @@ public final class AdministratorPanel extends ChildPanelSupport
 
     }
 
-    private JPanel topLogoutPanel(FlowLayout flowLayout) {
-        final JPanel logoutPanel = new JPanel(flowLayout);
-        final JButton button = new JButton("退出登录");
-        button.setBackground(new Color(255, 254, 240));
-        button.addActionListener(e -> this.logoutAction());
-
-        logoutPanel.add(button);
-        return logoutPanel;
-    }
-
-    private void logoutAction() {
-        final int dialogFlag = JOptionPane.showConfirmDialog(
-                AdministratorPanel.this,
-                "确定退出吗!",
-                "是否确认退出",
-                JOptionPane.YES_NO_OPTION
-        );
-
-        if (dialogFlag == JOptionPane.YES_OPTION) {
-            removeThisAndAdd(new LoginPanel());
-        }
-    }
-
 
     /**
      * 表格数据更新事件
      */
     @Override
     public PageInfo<AdminTableData> apply(Integer currentPage, TablePanel.DataInitType dataInitType) {
+
         switch (dataInitType) {
             case INIT:
                 return new PageInfo<>(userInfoList, 1, 100);
@@ -158,37 +132,59 @@ public final class AdministratorPanel extends ChildPanelSupport
                     JOptionPane.showMessageDialog(this, "已经是第一页了");
                     return null;
                 } else {
-                    return new PageInfo<>(getUserInfoList(), 1, 100);
+                    return new PageInfo<>(getUserInfoList(), currentPage - 1, 100);
                 }
             case NEXT_PAGE:
-                return new PageInfo<>(getUserInfoList(), 2, 100);
+                return new PageInfo<>(getUserInfoList(), currentPage + 1, 100);
         }
 
         return null;
     }
 
 
-    private class AdminTableOpt extends AdminOptTableCellEditor<AdminTableData> {
+    private enum AdminTableOptAction implements TableCellOperate.ActionName {
+        UPDATE("更新"),
+        DELETE("删除"),
+        DETAILS("详情"),
 
-        @Override
-        public void updateAction(AdminTableData data) {
-            new InformationEntryDialog(
-                    ((Frame) getRootPane().getParent()),
-                    data,
-                    it -> {
-                        JOptionPane.showMessageDialog(null, "更新成功");
-                        return true;
-                    }
-            );
+        ;
+        private final String name;
+
+        AdminTableOptAction(String name) {
+            this.name = name;
         }
 
         @Override
-        public void deleteAction(AdminTableData data) {
-            JOptionPane.showMessageDialog(AdministratorPanel.this, "开发中");
+        public String getActionName() {
+            return name;
         }
-
-
     }
 
+    private class AdminTableOpt extends TableCellOperate<AdminTableData, AdminTableOptAction> {
+
+        public AdminTableOpt() {
+            super(AdminTableOptAction.values());
+        }
+
+        @Override
+        public void execActionByType(AdminTableOptAction actionType, AdminTableData data) {
+            switch (actionType) {
+                case DELETE:
+                case DETAILS:
+                    JOptionPane.showMessageDialog(AdministratorPanel.this, actionType.getActionName() + "开发中");
+                    break;
+                case UPDATE:
+                    new InformationEntryDialog(
+                            ((Frame) getRootPane().getParent()),
+                            data,
+                            it -> {
+                                JOptionPane.showMessageDialog(null, "更新成功");
+                                return true;
+                            }
+                    );
+            }
+
+        }
+    }
 
 }
