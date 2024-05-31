@@ -7,6 +7,7 @@ import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.SetInputValueDocumentListener;
 import com.qnxy.window.TableCellOperate;
 import com.qnxy.window.common.LogoutPanel;
+import com.qnxy.window.common.RentalTableDetailsDialog;
 import com.qnxy.window.common.TablePanel;
 import com.qnxy.window.common.TablePanel.NameAndValue;
 import lombok.Getter;
@@ -151,8 +152,10 @@ public final class AdministratorPanel extends ChildPanelSupport
         public void execActionByType(AdminTableOptAction actionType, RentalTableData data) {
             switch (actionType) {
                 case DELETE:
-                case DETAILS:
                     JOptionPane.showMessageDialog(AdministratorPanel.this, actionType.getActionName() + "开发中");
+                    break;
+                case DETAILS:
+                    new RentalTableDetailsDialog(((JFrame) getRootPane().getParent()), data.toString(), it -> System.out.println("输入内容为: \n" + it));
                     break;
                 case UPDATE:
                     new InformationEntryDialog(

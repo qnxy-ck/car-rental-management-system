@@ -8,6 +8,7 @@ import com.qnxy.window.SetInputValueDocumentListener;
 import com.qnxy.window.TableCellOperate;
 import com.qnxy.window.common.LogoutPanel;
 import com.qnxy.window.common.RadioButtonGroup;
+import com.qnxy.window.common.RentalTableDetailsDialog;
 import com.qnxy.window.common.TablePanel;
 
 import javax.swing.*;
@@ -128,7 +129,16 @@ public final class UserPanel extends ChildPanelSupport
 
         @Override
         public void execActionByType(UserTableOptAction actionType, RentalTableData data) {
-            JOptionPane.showMessageDialog(UserPanel.this, actionType.getActionName() + "开发中");
+            switch (actionType) {
+                case DETAILS:
+                    new RentalTableDetailsDialog(
+                            ((JFrame) getRootPane().getParent()),
+                            data.toString()
+                    );
+                    break;
+                case RENT:
+                    JOptionPane.showMessageDialog(UserPanel.this, actionType.getActionName() + "开发中");
+            }
         }
 
     }

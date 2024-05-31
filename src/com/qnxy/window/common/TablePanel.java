@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +74,7 @@ public final class TablePanel<T> extends JPanel {
 
         // 将表格设置到当前 JScrollPane 中
         final JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(1200, 500));
+        scrollPane.setPreferredSize(new Dimension(1200, 506));
 
         setLayout(new BorderLayout());
 
