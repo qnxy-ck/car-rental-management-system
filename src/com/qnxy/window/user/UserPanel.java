@@ -46,7 +46,8 @@ public final class UserPanel extends ChildPanelSupport
 
     private boolean allOrRent = true;
     private String inputValue = "";
-    private TablePanel<RentalTableData> userInfoTablePanel;
+    private TablePanel<RentalTableData> dataTablePanel;
+    private RadioButtonGroup<Boolean> radioButtonGroup;
 
     @Override
     protected void initialization(ParentFrameScope parentFrameScope) {
@@ -58,9 +59,9 @@ public final class UserPanel extends ChildPanelSupport
         add(topButtonPanel(), BorderLayout.NORTH);
 
         // 中间的表格
-        userInfoTablePanel = new TablePanel<>(tableHeaderDataList, this);
+        dataTablePanel = new TablePanel<>(tableHeaderDataList, this);
 
-        add(userInfoTablePanel, BorderLayout.CENTER);
+        add(dataTablePanel, BorderLayout.CENTER);
 
     }
 
@@ -77,7 +78,7 @@ public final class UserPanel extends ChildPanelSupport
         final JPanel optionPanel = new JPanel(flowLayout);
 
         // 筛选条件(全部还是可租用)
-        new RadioButtonGroup<>(
+        radioButtonGroup = new RadioButtonGroup<>(
                 optionPanel,
                 map,
                 allOrRent,
@@ -86,7 +87,7 @@ public final class UserPanel extends ChildPanelSupport
 
 
         final JTextField textField = new JTextField();
-        textField.setPreferredSize(new Dimension(200, 30));
+        textField.setPreferredSize(new Dimension(230, 30));
         textField.getDocument().addDocumentListener((SetInputValueDocumentListener) inputValue -> this.inputValue = inputValue);
 
         optionPanel.add(textField);
@@ -94,11 +95,21 @@ public final class UserPanel extends ChildPanelSupport
         new QuickListenerAdder(optionPanel)
                 .add(new JButton("查询"), e -> JOptionPane.showMessageDialog(this, "查询内容为: " + this.inputValue + "\n\n查询功能实现中\n"))
                 .add(new JButton("我的租车"), e -> JOptionPane.showMessageDialog(this, "我的租车查询功能实现中\n"))
-                .add(new JButton("刷新列表"), e -> JOptionPane.showMessageDialog(this, "刷新列表未实现"));
+                .add(new JButton("清空/刷新"), e -> this.clearAndRefreshAction(textField));
 
         panel.add(optionPanel, BorderLayout.EAST);
         return panel;
     }
+
+    /**
+     * 重置输入内容和选项 刷新列表数据
+     */
+    private void clearAndRefreshAction(JTextField textField) {
+        textField.setText("");
+        this.radioButtonGroup.restoreSelection();
+        this.dataTablePanel.refreshTableData(new PageInfo<>(getUserInfoList(), 1, 123));
+    }
+
 
     @Override
     public PageInfo<RentalTableData> apply(Integer integer, TablePanel.DataInitType dataInitType) {

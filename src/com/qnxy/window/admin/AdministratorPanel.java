@@ -41,7 +41,7 @@ public final class AdministratorPanel extends ChildPanelSupport
         add(NameAndValue.of("操作", it -> new AdminTableOpt()));
     }};
     // 当前面板表格
-    private TablePanel<RentalTableData> userInfoTablePanel;
+    private TablePanel<RentalTableData> dataTablePanel;
 
 
     private String inputValue = "";
@@ -59,9 +59,9 @@ public final class AdministratorPanel extends ChildPanelSupport
         add(topButtonPanel(), BorderLayout.NORTH);
 
         // 中间的表格
-        userInfoTablePanel = new TablePanel<>(tableHeaderDataList, this);
+        dataTablePanel = new TablePanel<>(tableHeaderDataList, this);
 
-        add(userInfoTablePanel, BorderLayout.CENTER);
+        add(dataTablePanel, BorderLayout.CENTER);
 
     }
 
@@ -80,24 +80,30 @@ public final class AdministratorPanel extends ChildPanelSupport
 
         // 查询
         final JTextField textField = new JTextField();
-        textField.setPreferredSize(new Dimension(200, 30));
+        textField.setPreferredSize(new Dimension(230, 30));
         textField.getDocument().addDocumentListener((SetInputValueDocumentListener) inputValue -> this.inputValue = inputValue);
 
         optionPanel.add(textField);
 
         new QuickListenerAdder(optionPanel)
-                .add(new JButton("查询"), e -> JOptionPane.showMessageDialog(this, "查询内容为: " + this.inputValue + "\n\n查询功能实现中\n"))
-                .add(new JButton("汽车信息录入"), e -> carInformationEntry())
-                .add(new JButton("刷新列表"), e -> JOptionPane.showMessageDialog(this, "刷新列表未实现"));
+                .add(new JButton("查询"), e -> JOptionPane.showMessageDialog(this, "查询内容为: " + this.inputValue + "\n\n查询功能实现中\n")).add(new JButton("汽车信息录入"), e -> carInformationEntryAction()).add(new JButton("清空/刷新"), e -> this.clearAndRefreshAction(textField));
 
         panel.add(optionPanel, BorderLayout.EAST);
         return panel;
     }
 
     /**
+     * 重置输入内容 刷新列表数据
+     */
+    private void clearAndRefreshAction(JTextField textField) {
+        textField.setText("");
+        this.dataTablePanel.refreshTableData(new PageInfo<>(getUserInfoList(), 1, 100));
+    }
+
+    /**
      * 汽车信息录入事件
      */
-    private void carInformationEntry() {
+    private void carInformationEntryAction() {
         new InformationEntryDialog(
                 (Frame) getRootPane().getParent(),
                 it -> {

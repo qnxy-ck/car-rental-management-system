@@ -87,37 +87,30 @@ public final class TablePanel<T> extends JPanel {
      */
     private JPanel bottomPagePanel() {
         return new JPanel() {{
-            setLayout(new FlowLayout(FlowLayout.RIGHT, 15, 20));
-            setPreferredSize(new Dimension(0, 60));
+            setLayout(new BorderLayout());
+            setBorder(BorderFactory.createEmptyBorder(10, 50, 6, 20));
 
-            new QuickListenerAdder(this)
+            final JPanel leftPanel = new JPanel();
+            final JPanel rightPanel = new JPanel();
+
+            final JLabel label = new JLabel("By: ck - qnxy1997@gmail.com", SwingConstants.CENTER);
+            label.setFont(new Font("宋体", Font.ITALIC, 17));
+            label.setPreferredSize(new Dimension(260, 30));
+            label.setForeground(new Color(110, 83, 80, 255));
+            leftPanel.add(label);
+
+
+            new QuickListenerAdder(rightPanel)
                     .add(new JButton("上一页"), e -> invokeDataGetFun(DataInitType.UP_PAGE))
                     .add(new JButton("下一页"), e -> invokeDataGetFun(DataInitType.NEXT_PAGE));
+            bottomLabelJLabelMap.keySet().forEach(rightPanel::add);
 
-            add(new JLabel("跳转到:"));
-            add(jumpTextField());
 
-            bottomLabelJLabelMap.keySet().forEach(this::add);
+            add(leftPanel, BorderLayout.WEST);
+            add(rightPanel, BorderLayout.EAST);
         }};
     }
 
-    private JTextField jumpTextField() {
-        final JTextField jumpTextField = new JTextField();
-        jumpTextField.setPreferredSize(new Dimension(50, 30));
-        jumpTextField.setToolTipText("输入后敲击回车跳转");
-        jumpTextField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                    JOptionPane.showMessageDialog(
-                            TablePanel.this,
-                            "你输入的是: " + jumpTextField.getText() + ". \n\n但是功能尚未实现!!!\n"
-                    );
-                }
-            }
-        });
-        return jumpTextField;
-    }
 
     private void invokeDataGetFun(DataInitType dataInitType) {
         final Integer currentPage = Optional.ofNullable(this.pageInfo)
