@@ -3,6 +3,7 @@ package com.qnxy.window.common;
 import com.qnxy.common.data.PageInfo;
 import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.TableCellOperate;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
@@ -166,7 +167,7 @@ public final class TablePanel<T> extends JPanel {
      *
      * @param <T>
      */
-    @RequiredArgsConstructor
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     public static class NameAndValue<T> {
         private final String tableName;
         private final Function<T, Object> tableValueFunction;
