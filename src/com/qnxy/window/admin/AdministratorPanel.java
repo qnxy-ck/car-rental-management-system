@@ -86,7 +86,9 @@ public final class AdministratorPanel extends ChildPanelSupport
         optionPanel.add(textField);
 
         new QuickListenerAdder(optionPanel)
-                .add(new JButton("查询"), e -> JOptionPane.showMessageDialog(this, "查询内容为: " + this.inputValue + "\n\n查询功能实现中\n")).add(new JButton("汽车信息录入"), e -> carInformationEntryAction()).add(new JButton("清空/刷新"), e -> this.clearAndRefreshAction(textField));
+                .add(new JButton("查询"), e -> JOptionPane.showMessageDialog(this, "查询内容为: " + this.inputValue + "\n\n查询功能实现中\n"))
+                .add(new JButton("汽车信息录入"), e -> carInformationEntryAction())
+                .add(new JButton("清空/刷新"), e -> this.clearAndRefreshAction(textField));
 
         panel.add(optionPanel, BorderLayout.EAST);
         return panel;

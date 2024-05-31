@@ -6,7 +6,9 @@ import com.qnxy.window.TableCellOperate;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,7 +49,10 @@ public final class TablePanel<T> extends JPanel {
      *
      * @param tableHeaderDataList 当前表格表头信息和初始化数据方式
      */
-    public TablePanel(List<NameAndValue<T>> tableHeaderDataList, BiFunction<Integer, DataInitType, PageInfo<T>> dataGetFunc) {
+    public TablePanel(
+            List<NameAndValue<T>> tableHeaderDataList,
+            BiFunction<Integer, DataInitType, PageInfo<T>> dataGetFunc
+    ) {
         this.tableHeaderDataList = tableHeaderDataList;
         this.dataGetFunc = dataGetFunc;
 
@@ -129,6 +134,7 @@ public final class TablePanel<T> extends JPanel {
      */
     public void refreshTableData(PageInfo<T> pageInfo) {
         this.bottomLabelJLabelMap.forEach((label, consumer) -> consumer.accept(label, pageInfo));
+        this.pageInfo = pageInfo;
         table.updateUI();
     }
 
@@ -218,17 +224,22 @@ public final class TablePanel<T> extends JPanel {
                     .get(columnIndex)
                     .tableValueFunction
                     .apply(t);
-            final TableColumn c = table.getColumnModel().getColumn(columnIndex);
 
             if (apply instanceof TableCellOperate) {
-                if (pageInfo != null) {
-                    //noinspection unchecked
-                    ((TableCellOperate<T, ?>) apply).setData(pageInfo.getRecords());
+                if (pageInfo == null) {
+                    return null;
                 }
 
-                c.setCellRenderer((TableCellRenderer) apply);
-                c.setCellEditor((TableCellEditor) apply);
-                c.setPreferredWidth(((TableCellOperate<?, ?>) apply).getWidth());
+                //noinspection unchecked
+                final TableCellOperate<T, ?> tableCellOperate = (TableCellOperate<T, ?>) apply;
+
+                final TableColumn c = table.getColumnModel().getColumn(columnIndex);
+                c.setCellRenderer(tableCellOperate);
+                c.setCellEditor(tableCellOperate);
+                c.setPreferredWidth(tableCellOperate.getWidth());
+
+                tableCellOperate.setData(pageInfo.getRecords());
+
                 return null;
             }
 

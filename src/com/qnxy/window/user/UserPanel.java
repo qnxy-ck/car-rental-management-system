@@ -10,6 +10,8 @@ import com.qnxy.window.common.LogoutPanel;
 import com.qnxy.window.common.RadioButtonGroup;
 import com.qnxy.window.common.RentalTableDetailsDialog;
 import com.qnxy.window.common.TablePanel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -116,19 +118,13 @@ public final class UserPanel extends ChildPanelSupport
         return new PageInfo<>(getUserInfoList(), 1, 200);
     }
 
+    @RequiredArgsConstructor
+    @Getter
     private enum UserTableOptAction implements TableCellOperate.ActionName {
         RENT("租用"),
         DETAILS("详情");
-        private final String name;
 
-        UserTableOptAction(String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String getActionName() {
-            return name;
-        }
+        private final String actionName;
     }
 
     private class UserTableOpt extends TableCellOperate<RentalTableData, UserTableOptAction> {
