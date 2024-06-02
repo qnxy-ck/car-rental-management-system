@@ -1,6 +1,6 @@
 package com.qnxy.table;
 
-import com.qnxy.table.panel.TableDemo03;
+import com.qnxy.table.panel.TableDemo04;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +15,7 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
-        setContentPane(new TableDemo03());
+        setContentPane(new TableDemo04());
 
         pack();
         setLocationRelativeTo(null);

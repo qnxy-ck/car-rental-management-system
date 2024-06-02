@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,6 +22,7 @@ public final class TestSource {
 
     private static final Map<LoginType, Map<String, String>> LOGIN_INFO_MAP = new HashMap<>();
     private static final SecureRandom rand = new SecureRandom();
+    private static final AtomicInteger counter = new AtomicInteger(0);
 
     static {
         final Map<String, String> userLoginMap = new HashMap<>();
@@ -60,7 +62,7 @@ public final class TestSource {
 
     public static List<RentalTableData> getUserInfoList() {
         return Stream.generate(() -> new RentalTableData(
-                        0,
+                        counter.incrementAndGet(),
                         "carModel " + rand.nextBoolean(),
                         "carOwner",
                         "price",
