@@ -1,4 +1,4 @@
-package com.qnxy.table;
+package com.qnxy.table.panel;
 
 import javax.swing.*;
 import javax.swing.table.TableModel;

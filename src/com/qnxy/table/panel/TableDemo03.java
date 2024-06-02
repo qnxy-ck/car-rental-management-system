@@ -1,20 +1,26 @@
-package com.qnxy.table;
+package com.qnxy.table.panel;
 
+import com.qnxy.table.UserInfoDataInitUtils;
 import com.qnxy.table.data.UserInfo;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javax.swing.JOptionPane.showMessageDialog;
+
 /**
  * {@link TableModel} 方式使用表格
+ * 进阶使用, 表格单元格中增加按钮组件
  *
  * @author Qnxy
  */
-public class TableDemo02 extends JPanel {
+public class TableDemo03 extends JPanel {
 
     /**
      * 创建一个表格类
@@ -24,14 +30,14 @@ public class TableDemo02 extends JPanel {
     /**
      * 表头信息
      */
-    private final String[] tableHeaders = {"id", "username", "age", "birthday"};
+    private final String[] tableHeaders = {"id", "username", "age", "birthday", "opt"};
 
     /**
      * 初始化表格数据
      */
     private final List<UserInfo> tableDataList = new ArrayList<>();
 
-    public TableDemo02() {
+    public TableDemo03() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(1200, 700));
         
@@ -50,6 +56,17 @@ public class TableDemo02 extends JPanel {
         // 表格相关属性设置 ...
         table.setRowHeight(35);
 
+        // 添加自定义单元格
+        // 使单元格中可以展示控件
+
+        // 获取对列的操作
+        final TableColumn tableColumn = table.getColumnModel()
+                // 获取最后一列
+                .getColumn(tableHeaders.length - 1);
+
+        tableColumn.setCellRenderer(new TableCellOpt());
+        tableColumn.setCellEditor(new TableCellOpt());
+
 
         // 创建表格后立即初始化数据
 //        this.initTableData();
@@ -60,7 +77,7 @@ public class TableDemo02 extends JPanel {
 
         this.add(
                 new JButton("点击加载数据") {{
-                    addActionListener(e -> TableDemo02.this.initTableData());
+                    addActionListener(e -> TableDemo03.this.initTableData());
                 }},
                 BorderLayout.SOUTH
         );
@@ -96,7 +113,7 @@ public class TableDemo02 extends JPanel {
          */
         @Override
         public int getRowCount() {
-            return TableDemo02.this.tableDataList.size();
+            return TableDemo03.this.tableDataList.size();
         }
 
         /**
@@ -104,7 +121,7 @@ public class TableDemo02 extends JPanel {
          */
         @Override
         public int getColumnCount() {
-            return TableDemo02.this.tableHeaders.length;
+            return TableDemo03.this.tableHeaders.length;
         }
 
         /**
@@ -114,7 +131,7 @@ public class TableDemo02 extends JPanel {
          */
         @Override
         public String getColumnName(int column) {
-            return TableDemo02.this.tableHeaders[column];
+            return TableDemo03.this.tableHeaders[column];
         }
 
         /**
@@ -126,7 +143,7 @@ public class TableDemo02 extends JPanel {
          */
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            final UserInfo userInfo = TableDemo02.this.tableDataList.get(rowIndex);
+            final UserInfo userInfo = TableDemo03.this.tableDataList.get(rowIndex);
 
             return switch (columnIndex) {
                 case 0 -> userInfo.getId();
@@ -137,9 +154,66 @@ public class TableDemo02 extends JPanel {
                         userInfo.getBirthday();
                 default -> null;
             };
+        }
+
+        /**
+         * 单元格是否可编辑
+         * 返回 false 不可编辑
+         *
+         * @param rowIndex    第几行
+         * @param columnIndex 第几列
+         */
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            return columnIndex == tableHeaders.length - 1;
+        }
+    }
+
+
+    /**
+     * 自定义表格数据展示内容
+     * 可以展示一个控件
+     * 比如按钮, 输入框
+     */
+    private class TableCellOpt extends DefaultCellEditor implements TableCellRenderer {
+
+        private final JPanel panel = new JPanel();
+
+
+        public TableCellOpt() {
+            super(new JTextField());
+            initOptPanel();
+
+            setClickCountToStart(1);
 
         }
 
+
+        private void initOptPanel() {
+            panel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+            panel.setPreferredSize(new Dimension(100, 50));
+
+
+            List.of("修改", "删除")
+                    .forEach(name -> panel.add(
+                                    new JButton(name) {{
+                                        addActionListener(e -> showMessageDialog(TableDemo03.this, "你点击了 -> " + name));
+                                    }}
+                            )
+                    );
+
+        }
+
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            return panel;
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            return panel;
+        }
     }
 
 }

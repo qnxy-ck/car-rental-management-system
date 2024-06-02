@@ -4,14 +4,14 @@ import com.qnxy.table.data.UserInfo;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 /**
  * @author Qnxy
  */
 public final class UserInfoDataInitUtils {
-    private static final AtomicInteger accessCount = new AtomicInteger(0);
+
+    private static int accessCount = 0;
 
     /**
      * jdk >= 16 才可以正常使用
@@ -23,7 +23,7 @@ public final class UserInfoDataInitUtils {
     public static List<UserInfo> userInfoList(int listSize) {
         return Stream.generate(
                         () -> new UserInfo()
-                                .setId(accessCount.getAndIncrement())
+                                .setId(accessCount += 1)
                                 .setAge(10)
                                 .setUsername("ck")
                                 .setBirthday(LocalDate.now())
