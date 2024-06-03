@@ -38,7 +38,7 @@ public final class UserPanel extends ChildPanelSupport
         add(TablePanel.NameAndValue.of("价格(元/天)", RentalTableData::getPrice));
         add(TablePanel.NameAndValue.of("颜色", RentalTableData::getCarColor));
         add(TablePanel.NameAndValue.of("是否被租用", it -> it.getLeased() ? "是" : "否"));
-        add(TablePanel.NameAndValue.of("操作", it -> new UserTableOpt()));
+        add(TablePanel.NameAndValue.of("操作", UserTableOpt::new));
     }};
 
     private final Map<String, Boolean> map = new HashMap<String, Boolean>() {{

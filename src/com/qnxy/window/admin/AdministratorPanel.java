@@ -38,7 +38,7 @@ public final class AdministratorPanel extends ChildPanelSupport
         add(NameAndValue.of("颜色", RentalTableData::getCarColor));
         add(NameAndValue.of("是否被租用", it -> it.getLeased() ? "是" : "否"));
         add(NameAndValue.of("租用的用户", RentalTableData::getLeasedUser));
-        add(NameAndValue.of("操作", it -> new AdminTableOpt()));
+        add(NameAndValue.of("操作", AdminTableOpt::new));
     }};
     // 当前面板表格
     private TablePanel<RentalTableData> dataTablePanel;

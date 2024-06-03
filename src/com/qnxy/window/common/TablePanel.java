@@ -10,6 +10,7 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 /**
  * 自定义表格
@@ -25,6 +28,7 @@ import java.util.function.Function;
  * @author Qnxy
  */
 public final class TablePanel<T> extends JPanel {
+
 
     /**
      * 表头信息
@@ -58,7 +62,29 @@ public final class TablePanel<T> extends JPanel {
         this.dataGetFunc = dataGetFunc;
 
         initTablePanel();
+        initCellOperate();
+
         invokeDataGetFun(DataInitType.INIT);
+    }
+
+    /**
+     * 初始化表格自定义操作
+     */
+    private void initCellOperate() {
+        final TableColumnModel columnModel = this.table.getColumnModel();
+
+        IntStream.range(0, this.tableHeaderDataList.size()).forEach(i -> {
+            final Supplier<? extends TableCellOperate<T, ?>> cellOperateSupplier = tableHeaderDataList.get(i).cellOperateSupplier;
+            if (cellOperateSupplier != null) {
+                final TableColumn column = columnModel.getColumn(i);
+                final TableCellOperate<T, ?> tableCellOperate = cellOperateSupplier.get();
+
+                column.setPreferredWidth(tableCellOperate.getWidth());
+
+                column.setCellRenderer(tableCellOperate);
+                column.setCellEditor(tableCellOperate);
+            }
+        });
     }
 
 
@@ -169,11 +195,16 @@ public final class TablePanel<T> extends JPanel {
      */
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     public static class NameAndValue<T> {
-        private final String tableName;
-        private final Function<T, Object> tableValueFunction;
+        private final String tableTitle;
+        private final Function<T, Object> valueGetFun;
+        private final Supplier<TableCellOperate<T, ?>> cellOperateSupplier;
 
-        public static <T> NameAndValue<T> of(String tableName, Function<T, Object> tableValueFunction) {
-            return new NameAndValue<>(tableName, tableValueFunction);
+        public static <T> NameAndValue<T> of(String tableTitle, Function<T, Object> valueGetFun) {
+            return new NameAndValue<>(tableTitle, valueGetFun, null);
+        }
+
+        public static <T> NameAndValue<T> of(String tableTitle, Supplier<TableCellOperate<T, ?>> cellOperateSupplier) {
+            return new NameAndValue<>(tableTitle, null, cellOperateSupplier);
         }
 
     }
@@ -201,7 +232,7 @@ public final class TablePanel<T> extends JPanel {
             return TablePanel.this
                     .tableHeaderDataList
                     .get(column)
-                    .tableName;
+                    .tableTitle;
         }
 
 
@@ -216,36 +247,11 @@ public final class TablePanel<T> extends JPanel {
                 return null;
             }
 
-            final T t = TablePanel.this.pageInfo
-                    .getRecords()
-                    .get(rowIndex);
+            final T t = TablePanel.this.pageInfo.getRecords().get(rowIndex);
 
-            final Object apply = TablePanel.this
-                    .tableHeaderDataList
-                    .get(columnIndex)
-                    .tableValueFunction
-                    .apply(t);
-
-            if (apply instanceof TableCellOperate) {
-                if (pageInfo == null) {
-                    return null;
-                }
-
-                //noinspection unchecked
-                final TableCellOperate<T, ?> tableCellOperate = (TableCellOperate<T, ?>) apply;
-
-                final TableColumn c = table.getColumnModel().getColumn(columnIndex);
-                c.setCellRenderer(tableCellOperate);
-                c.setCellEditor(tableCellOperate);
-                c.setPreferredWidth(tableCellOperate.getWidth());
-
-                tableCellOperate.setData(pageInfo.getRecords());
-
-                return null;
-            }
-
-            return apply;
-
+            return Optional.ofNullable(TablePanel.this.tableHeaderDataList.get(columnIndex).valueGetFun)
+                    .map(it -> it.apply(t))
+                    .orElse(t);
         }
 
     }
