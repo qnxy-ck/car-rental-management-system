@@ -82,7 +82,7 @@ public class TableDemo02 extends JPanel {
         this.tableDataList.clear();
         this.tableDataList.addAll(userInfos);
 
-        // 使表格重新绘制, 根据最新的素具
+        // 使表格重新绘制, 根据最新的数据
         this.table.updateUI();
     }
 
