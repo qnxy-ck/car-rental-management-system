@@ -34,20 +34,15 @@ public class UpdateSpace {
         return this;
     }
 
-    public int update() {
+    public int update() throws SQLException {
         final DataSource dataSource = DataSourceConfiguration.dataSource();
-        try {
-            final Connection connection = dataSource.getConnection();
-            final PreparedStatement ps = connection.prepareStatement(sql);
-            for (int i = 0; i < this.paramList.size(); i++) {
-                ps.setObject(i + 1, this.paramList.get(i));
-            }
-
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("更新错误", e);
+        final Connection connection = dataSource.getConnection();
+        final PreparedStatement ps = connection.prepareStatement(sql);
+        for (int i = 0; i < this.paramList.size(); i++) {
+            ps.setObject(i + 1, this.paramList.get(i));
         }
-        return 0;
+
+        return ps.executeUpdate();
     }
 
 }
