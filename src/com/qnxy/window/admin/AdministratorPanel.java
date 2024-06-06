@@ -1,7 +1,8 @@
 package com.qnxy.window.admin;
 
 import com.qnxy.common.data.PageInfo;
-import com.qnxy.common.data.ui.RentalTableData;
+import com.qnxy.common.data.entity.CarInformation;
+import com.qnxy.service.AdminTableInfoService;
 import com.qnxy.window.ChildPanelSupport;
 import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.SetInputValueDocumentListener;
@@ -19,29 +20,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import static com.qnxy.window.TestSource.getUserInfoList;
-
 /**
  * 管理员窗口
  *
  * @author Qnxy
  */
 public final class AdministratorPanel extends ChildPanelSupport
-        implements BiFunction<Integer, TablePanel.DataInitType, PageInfo<RentalTableData>> {
+        implements BiFunction<Integer, TablePanel.DataInitType, PageInfo<CarInformation>> {
+
+    private final AdminTableInfoService adminTableInfoService = new AdminTableInfoService();
 
     // 当前面板表格表头及对应值获取方式数据
-    private final List<NameAndValue<RentalTableData>> tableHeaderDataList = new ArrayList<NameAndValue<RentalTableData>>() {{
-        add(NameAndValue.of("编号", RentalTableData::getId));
-        add(NameAndValue.of("车型", RentalTableData::getCarModel));
-        add(NameAndValue.of("车主", RentalTableData::getCarOwner));
-        add(NameAndValue.of("价格(元/天)", RentalTableData::getPrice));
-        add(NameAndValue.of("颜色", RentalTableData::getCarColor));
-        add(NameAndValue.of("是否被租用", it -> it.getLeased() ? "是" : "否"));
-        add(NameAndValue.of("租用的用户", RentalTableData::getLeasedUser));
+    private final List<NameAndValue<CarInformation>> tableHeaderDataList = new ArrayList<NameAndValue<CarInformation>>() {{
+        add(NameAndValue.of("编号", CarInformation::getId));
+        add(NameAndValue.of("车型", CarInformation::getCarType));
+        add(NameAndValue.of("车主", CarInformation::getCarRenters));
+        add(NameAndValue.of("价格(元/天)", CarInformation::getPrice));
+        add(NameAndValue.of("颜色", CarInformation::getColor));
+        add(NameAndValue.of("是否被租用", it -> it.getUid() != null ? "是" : "否"));
+        add(NameAndValue.of("租用的用户", CarInformation::getUid));
         add(NameAndValue.of("操作", AdminTableOpt::new));
     }};
     // 当前面板表格
-    private TablePanel<RentalTableData> dataTablePanel;
+    private TablePanel<CarInformation> dataTablePanel;
 
 
     private String inputValue = "";
@@ -86,7 +87,7 @@ public final class AdministratorPanel extends ChildPanelSupport
         optionPanel.add(textField);
 
         new QuickListenerAdder(optionPanel)
-                .add(new JButton("查询"), e -> JOptionPane.showMessageDialog(this, "查询内容为: " + this.inputValue + "\n\n查询功能实现中\n"))
+                .add(new JButton("查询"), e -> this.dataTablePanel.refreshTableData(getData(1)))
                 .add(new JButton("汽车信息录入"), e -> carInformationEntryAction())
                 .add(new JButton("清空/刷新"), e -> this.clearAndRefreshAction(textField));
 
@@ -99,18 +100,26 @@ public final class AdministratorPanel extends ChildPanelSupport
      */
     private void clearAndRefreshAction(JTextField textField) {
         textField.setText("");
-        this.dataTablePanel.refreshTableData(new PageInfo<>(getUserInfoList(), 1, 100));
+        this.dataTablePanel.refreshTableData(getData(1));
     }
 
     /**
      * 汽车信息录入事件
      */
     private void carInformationEntryAction() {
+
         new InformationEntryDialog(
                 (Frame) getRootPane().getParent(),
                 it -> {
-                    JOptionPane.showMessageDialog(this, "录入成功");
-                    return true;
+
+                    if (adminTableInfoService.addAdminTableInfo(it)) {
+                        JOptionPane.showMessageDialog(this, "录入成功");
+                        AdministratorPanel.this.dataTablePanel.refreshTableData(getData(1));
+                        return true;
+                    } else {
+                        JOptionPane.showMessageDialog(this, "录入失败");
+                        return false;
+                    }
                 }
         );
 
@@ -120,25 +129,45 @@ public final class AdministratorPanel extends ChildPanelSupport
      * 表格数据更新事件
      */
     @Override
-    public PageInfo<RentalTableData> apply(Integer currentPage, TablePanel.DataInitType dataInitType) {
+    public PageInfo<CarInformation> apply(Integer currentPage, TablePanel.DataInitType dataInitType) {
 
         switch (dataInitType) {
             case INIT:
-                return new PageInfo<>(getUserInfoList(), 1, 100);
+                return getData(currentPage);
             case UP_PAGE:
                 if (currentPage <= 1) {
                     JOptionPane.showMessageDialog(this, "已经是第一页了");
                     return null;
                 } else {
-                    return new PageInfo<>(getUserInfoList(), currentPage - 1, 100);
+                    return getData(currentPage - 1);
                 }
             case NEXT_PAGE:
-                return new PageInfo<>(getUserInfoList(), currentPage + 1, 100);
+                return getData(currentPage + 1);
         }
 
         return null;
     }
 
+
+    private PageInfo<CarInformation> getData(Integer currentPage) {
+
+        Integer id = null;
+        try {
+            if (!(this.inputValue == null || this.inputValue.trim().isEmpty())) {
+                id = Integer.parseInt(this.inputValue);
+            }
+        } catch (NumberFormatException e) {
+            // tishi
+        }
+        PageInfo<CarInformation> carInformationPageInfo = this.adminTableInfoService.selectTableInfo(id, currentPage);
+
+        if (carInformationPageInfo.getRecords().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "已经没有更多数据了!");
+            return null;
+        } else {
+            return carInformationPageInfo;
+        }
+    }
 
     @RequiredArgsConstructor
     @Getter
@@ -150,14 +179,14 @@ public final class AdministratorPanel extends ChildPanelSupport
         private final String actionName;
     }
 
-    private class AdminTableOpt extends TableCellOperate<RentalTableData, AdminTableOptAction> {
+    private class AdminTableOpt extends TableCellOperate<CarInformation, AdminTableOptAction> {
 
         public AdminTableOpt() {
             super(AdminTableOptAction.values());
         }
 
         @Override
-        public void execActionByType(AdminTableOptAction actionType, RentalTableData data) {
+        public void execActionByType(AdminTableOptAction actionType, CarInformation data) {
             switch (actionType) {
                 case DELETE:
                     JOptionPane.showMessageDialog(AdministratorPanel.this, actionType.getActionName() + "开发中");

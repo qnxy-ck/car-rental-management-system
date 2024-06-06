@@ -39,7 +39,7 @@ public final class TablePanel<T> extends JPanel {
     private final Map<JLabel, BiConsumer<JLabel, PageInfo<T>>> bottomLabelJLabelMap = new LinkedHashMap<JLabel, BiConsumer<JLabel, PageInfo<T>>>() {{
         put(new JLabel("当前页: 1"), (label, pageInfo) -> label.setText("当前页: " + pageInfo.getCurrentPage()));
         put(new JLabel("当前页数量: 0"), (label, pageInfo) -> label.setText("当前页数量: " + pageInfo.getPageSize()));
-        put(new JLabel("总页数: 0"), (label, pageInfo) -> label.setText("总页数: " + pageInfo.getTotal()));
+        put(new JLabel("总条数: 0"), (label, pageInfo) -> label.setText("总条数: " + pageInfo.getTotal()));
     }};
 
     private final BiFunction<Integer, DataInitType, PageInfo<T>> dataGetFunc;
@@ -147,7 +147,7 @@ public final class TablePanel<T> extends JPanel {
     private void invokeDataGetFun(DataInitType dataInitType) {
         final Integer currentPage = Optional.ofNullable(this.pageInfo)
                 .map(PageInfo::getCurrentPage)
-                .orElse(0);
+                .orElse(1);
 
         final PageInfo<T> p = this.dataGetFunc.apply(currentPage, dataInitType);
         if (p != null) {

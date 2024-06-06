@@ -2,6 +2,8 @@ package com.qnxy.common.data.entity;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * 车辆信息实体类
  *
@@ -45,4 +47,9 @@ public class CarInformation {
      * 租用人
      */
     private Integer uid;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createdAt;
 }

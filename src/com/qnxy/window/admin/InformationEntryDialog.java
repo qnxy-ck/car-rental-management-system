@@ -1,6 +1,6 @@
 package com.qnxy.window.admin;
 
-import com.qnxy.common.data.ui.RentalTableData;
+import com.qnxy.common.data.entity.CarInformation;
 import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.common.LabelTextField;
 import com.qnxy.window.common.RadioButtonGroup;
@@ -30,7 +30,7 @@ final class InformationEntryDialog extends JDialog {
     /**
      * 当前页面展示数据
      */
-    private final RentalTableData rentalTableData;
+    private final CarInformation carInformation;
     private final List<LabelTextField> labelTextFieldList = new ArrayList<>();
 
     /**
@@ -42,7 +42,7 @@ final class InformationEntryDialog extends JDialog {
     /**
      * 提交的监听
      */
-    private final Function<RentalTableData, Boolean> submitAction;
+    private final Function<CarInformation, Boolean> submitAction;
 
     private RadioButtonGroup<Boolean> radioButtonGroup;
 
@@ -50,28 +50,28 @@ final class InformationEntryDialog extends JDialog {
     /**
      * 用于创建添加
      */
-    public InformationEntryDialog(Frame rootFrame, Function<RentalTableData, Boolean> submitAction) {
+    public InformationEntryDialog(Frame rootFrame, Function<CarInformation, Boolean> submitAction) {
         this(rootFrame, null, submitAction);
     }
 
     /**
      * 用于创建更新
      *
-     * @param rentalTableData 回显的数据
+     * @param carInformation 回显的数据
      */
-    public InformationEntryDialog(Frame rootFrame, RentalTableData rentalTableData, Function<RentalTableData, Boolean> submitAction) {
+    public InformationEntryDialog(Frame rootFrame, CarInformation carInformation, Function<CarInformation, Boolean> submitAction) {
         super(rootFrame);
         this.submitAction = submitAction;
 
         // 更新时回显数据不能为空, 如果为空则为添加
-        if (rentalTableData == null) {
+        if (carInformation == null) {
             this.isUpdate = false;
-            this.rentalTableData = new RentalTableData();
+            this.carInformation = new CarInformation();
             // 设置默认为未被租用
-            this.rentalTableData.setLeased(false);
+//            this.carInformation.setLeased(false);
         } else {
             this.isUpdate = true;
-            this.rentalTableData = rentalTableData;
+            this.carInformation = carInformation;
         }
 
 
@@ -123,13 +123,13 @@ final class InformationEntryDialog extends JDialog {
         // 根据输入条件判断是否展示序号
         if (isUpdate) {
             // 修改时序号不可编辑
-            labelTextFieldList.add(new LabelTextField("序      号:", rentalTableData.getId().toString(), false, null));
+            labelTextFieldList.add(new LabelTextField("序      号:", carInformation.getId().toString(), false, null));
         }
 
-        labelTextFieldList.add(new LabelTextField("车      型:", rentalTableData.getCarModel(), rentalTableData::setCarModel));
-        labelTextFieldList.add(new LabelTextField("车      主:", rentalTableData.getCarOwner(), rentalTableData::setCarOwner));
-        labelTextFieldList.add(new LabelTextField("价格(元/天):", rentalTableData.getPrice(), rentalTableData::setPrice));
-        labelTextFieldList.add(new LabelTextField("颜      色:", rentalTableData.getCarColor(), rentalTableData::setCarColor));
+        labelTextFieldList.add(new LabelTextField("车      型:", carInformation.getCarType(), carInformation::setCarType));
+        labelTextFieldList.add(new LabelTextField("车      主:", carInformation.getCarRenters(), carInformation::setCarRenters));
+        labelTextFieldList.add(new LabelTextField("价格(元/天):", carInformation.getPrice(), carInformation::setPrice));
+        labelTextFieldList.add(new LabelTextField("颜      色:", carInformation.getColor(), carInformation::setColor));
 
         return labelTextFieldList;
     }
@@ -148,14 +148,14 @@ final class InformationEntryDialog extends JDialog {
             // 将输入框添加到面板
             labelTextFields.forEach(this::add);
 
-            add(new JLabel("是否已租用:"));
-            // 是否已租用单选按钮
-            radioButtonGroup = new RadioButtonGroup<>(
-                    this,
-                    LEASED_STATUS_MAP,
-                    rentalTableData.getLeased(),
-                    rentalTableData::setLeased
-            );
+//            add(new JLabel("是否已租用:"));
+//            // 是否已租用单选按钮
+//            radioButtonGroup = new RadioButtonGroup<>(
+//                    this,
+//                    LEASED_STATUS_MAP,
+//                    rentalTableData.getLeased(),
+//                    rentalTableData::setLeased
+//            );
         }};
     }
 
@@ -168,7 +168,7 @@ final class InformationEntryDialog extends JDialog {
 
             new QuickListenerAdder(this)
                     .add(new JButton("提交"), e -> {
-                        if (submitAction.apply(rentalTableData)) {
+                        if (submitAction.apply(carInformation)) {
                             InformationEntryDialog.this.dispose();
                         }
                     })
