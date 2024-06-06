@@ -1,8 +1,8 @@
 package com.qnxy.window.login;
 
 import com.qnxy.common.LoginType;
+import com.qnxy.service.LoginPageService;
 import com.qnxy.window.ChildPanelSupport;
-import com.qnxy.window.TestSource;
 import com.qnxy.window.admin.AdministratorPanel;
 import com.qnxy.window.common.LabelTextField;
 import com.qnxy.window.common.RadioButtonGroup;
@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
  * @author Qnxy
  */
 public final class LoginPanel extends ChildPanelSupport {
+
+    private final LoginPageService loginPageService = new LoginPageService();
 
     /**
      * 用户名
@@ -118,12 +120,16 @@ public final class LoginPanel extends ChildPanelSupport {
         }};
     }
 
+    private static boolean hasText(String text) {
+        return text != null && !text.trim().isEmpty();
+    }
+
     /**
      * 登录事件
      */
     private ActionListener loginActionListener() {
         return e -> {
-            if (!TestSource.login(LoginPanel.this.selectedRadioType, this.username, this.password)) {
+            if (!loginPageService.login(LoginPanel.this.selectedRadioType, this.username, this.password)) {
                 JOptionPane.showMessageDialog(
                         this,
                         "账号或密码错误, 登陆失败!",
@@ -149,15 +155,34 @@ public final class LoginPanel extends ChildPanelSupport {
      */
     private ActionListener registerActionListener() {
         return e -> {
-            printVal();
 
-            JOptionPane.showMessageDialog(this, "待实现!");
+            if (selectedRadioType == LoginType.ADMINISTRATOR) {
+                JOptionPane.showMessageDialog(this, "仅限用户可以注册!");
+                return;
+            }
+
+
+            if (!checkInputValue()) {
+                JOptionPane.showMessageDialog(this, "输入内容不能为空!");
+                return;
+            }
+
+            switch (this.loginPageService.userRegister(this.username, this.password)) {
+                case SUC:
+                    JOptionPane.showMessageDialog(this, "注册成功!");
+                    break;
+                case ERR:
+                    JOptionPane.showMessageDialog(this, "注册失败!");
+                    break;
+                case DUPLICATE_NAME:
+                    JOptionPane.showMessageDialog(this, "名称重复, 换个名称试试!");
+            }
+
         };
     }
 
-
-    private void printVal() {
-        System.out.println("账户: " + username + " 密码: " + password + " 选择: " + selectedRadioType);
+    private boolean checkInputValue() {
+        return hasText(username) && hasText(password);
     }
-
 }
+

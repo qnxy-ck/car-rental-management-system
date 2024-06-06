@@ -15,17 +15,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public enum LoginType {
 
-    USER("用户"),
-    ADMINISTRATOR("管理员"),
+    USER("用户", 0),
+    ADMINISTRATOR("管理员", 1),
     ;
 
     private final String typeText;
-
-
-    public int getTypeNum() {
-        return this.ordinal();
-    }
-
+    private final int userType;
 
     public static Optional<LoginType> typeTextOf(String text) {
         return Arrays.stream(values())
