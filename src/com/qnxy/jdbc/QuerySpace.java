@@ -70,6 +70,28 @@ public final class QuerySpace<T> {
         return this.list().stream().findFirst();
     }
 
+    public int count() {
+        final DataSource dataSource = DataSourceConfiguration.dataSource();
+        try {
+            final Connection connection = dataSource.getConnection();
+            final PreparedStatement ps = connection.prepareStatement(sql);
+            for (int i = 0; i < this.paramList.size(); i++) {
+                ps.setObject(i + 1, this.paramList.get(i));
+            }
+            final ResultSet resultSet = ps.executeQuery();
+            int count = -1;
+            if (resultSet.next()) {
+                count = resultSet.getInt(1);
+            }
+
+            closeAction(connection, ps, resultSet);
+            return count;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<T> list() {
         final DataSource dataSource = DataSourceConfiguration.dataSource();
         try {
