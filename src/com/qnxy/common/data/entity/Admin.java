@@ -11,8 +11,18 @@ import lombok.Data;
 @Data
 public class Admin {
 
-    private int aid;
-    private String adminName;
-    private String adminPassword;
+    /**
+     * 编号
+     */
+    private Integer id;
 
+    /**
+     * 管理员名称
+     */
+    private String adminName;
+
+    /**
+     * 管理员密码
+     */
+    private String adminPassword;
 }

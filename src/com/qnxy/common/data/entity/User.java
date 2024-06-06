@@ -11,8 +11,20 @@ import lombok.Data;
 @Data
 public class User {
 
-    private int uid;
+
+    /**
+     * 编号
+     */
+    private Integer id;
+
+    /**
+     * 用户名称
+     */
     private String userName;
+
+    /**
+     * 用户密码
+     */
     private String userPassword;
 
 }
