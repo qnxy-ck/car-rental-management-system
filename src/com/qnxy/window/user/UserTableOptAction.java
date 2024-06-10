@@ -1,4 +1,4 @@
-package com.qnxy.common;
+package com.qnxy.window.user;
 
 import com.qnxy.window.ActionName;
 import lombok.Getter;

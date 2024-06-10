@@ -1,7 +1,8 @@
 package com.qnxy;
 
+import com.qnxy.jdbc.DataSourceConfiguration;
 import com.qnxy.window.ApplicationFrameSupport;
-import com.qnxy.window.admin.AdministratorPanel;
+import com.qnxy.window.login.LoginPanel;
 
 import java.awt.*;
 
@@ -14,11 +15,13 @@ public final class ApplicationMain extends ApplicationFrameSupport {
 
     public ApplicationMain() throws HeadlessException {
         // 添加默认窗口为登陆窗口
-        super(new AdministratorPanel());
+        super(new LoginPanel());
     }
 
     public static void main(String[] args) {
-        EventQueue.invokeLater(ApplicationMain::new);
+        //noinspection ResultOfMethodCallIgnored
+        new Thread(DataSourceConfiguration::dataSource).start();
+        new ApplicationMain();
     }
 
 }

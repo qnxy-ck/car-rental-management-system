@@ -1,6 +1,5 @@
 package com.qnxy.window.user;
 
-import com.qnxy.common.UserTableOptAction;
 import com.qnxy.common.data.PageInfo;
 import com.qnxy.common.data.entity.CarInformation;
 import com.qnxy.service.UserTableInfoService;
@@ -37,15 +36,16 @@ public final class UserPanel extends ChildPanelSupport
 
         add(NameAndValue.of("操作", UserTableOpt::new));
     }};
-    private final Integer userId;
+
     // 默认全部
     private boolean allOrRent = true;
-
-    private String inputValue = "";
     private final Map<String, Boolean> map = new HashMap<String, Boolean>() {{
         put("全部", allOrRent);
         put("可租用", !allOrRent);
     }};
+
+    private final Integer userId;
+    private String inputValue = "";
     private RadioButtonGroup<Boolean> radioButtonGroup;
     private TablePanel<CarInformation> dataTablePanel;
 
