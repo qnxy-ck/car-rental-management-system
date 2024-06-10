@@ -1,6 +1,9 @@
 package com.qnxy.common.data.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +14,9 @@ import java.time.LocalDateTime;
  * @since 2024/6/6
  */
 @Data
+@Accessors(chain = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class CarInformation {
 
     /**

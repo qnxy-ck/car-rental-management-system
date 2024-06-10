@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.function.Consumer;
 
 /**
  * 登录页
@@ -21,13 +22,17 @@ public class LoginPageService {
 
 
     // 用户登录
-    public boolean login(LoginType loginType, String username, String password) {
+    public boolean login(LoginType loginType, String username, String password, Consumer<Integer> setUserIdConsumer) {
 
         if (loginType == LoginType.USER) {
             return new QuerySpace<>(User.class)
                     .sql("select * from user where user_name = ? and user_password = ?")
                     .params(username, password)
                     .optional()
+                    .map(it -> {
+                        setUserIdConsumer.accept(it.getId());
+                        return it;
+                    })
                     .isPresent();
         }
 

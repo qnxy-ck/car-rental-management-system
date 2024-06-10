@@ -124,12 +124,22 @@ public final class LoginPanel extends ChildPanelSupport {
         return text != null && !text.trim().isEmpty();
     }
 
+
     /**
      * 登录事件
      */
     private ActionListener loginActionListener() {
+        final Integer[] userId = {null};
+
         return e -> {
-            if (!loginPageService.login(LoginPanel.this.selectedRadioType, this.username, this.password)) {
+            boolean login = loginPageService.login(
+                    LoginPanel.this.selectedRadioType,
+                    this.username,
+                    this.password,
+                    it -> userId[0] = it
+            );
+
+            if (!login) {
                 JOptionPane.showMessageDialog(
                         this,
                         "账号或密码错误, 登陆失败!",
@@ -141,7 +151,7 @@ public final class LoginPanel extends ChildPanelSupport {
 
             switch (LoginPanel.this.selectedRadioType) {
                 case USER:
-                    super.removeThisAndAdd(new UserPanel());
+                    super.removeThisAndAdd(new UserPanel(userId[0]));
                     break;
                 case ADMINISTRATOR:
                     super.removeThisAndAdd(new AdministratorPanel());

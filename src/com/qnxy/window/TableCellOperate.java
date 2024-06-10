@@ -11,7 +11,7 @@ import java.awt.*;
  *
  * @author Qnxy
  */
-public abstract class TableCellOperate<T, TYPE extends Enum<TYPE> & TableCellOperate.ActionName>
+public abstract class TableCellOperate<T, TYPE extends Enum<TYPE> & ActionName>
         extends DefaultCellEditor
         implements TableCellRenderer {
 
@@ -64,14 +64,5 @@ public abstract class TableCellOperate<T, TYPE extends Enum<TYPE> & TableCellOpe
      */
     public abstract void execActionByType(TYPE actionType, T data);
 
-
-    /**
-     * 所有的事件类型应该实现该接口, 并且需要是枚举类
-     */
-    public interface ActionName {
-
-        String getActionName();
-
-    }
 
 }

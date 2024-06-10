@@ -130,6 +130,7 @@ final class InformationEntryDialog extends JDialog {
         labelTextFieldList.add(new LabelTextField("车      主:", carInformation.getCarRenters(), carInformation::setCarRenters));
         labelTextFieldList.add(new LabelTextField("价格(元/天):", carInformation.getPrice(), carInformation::setPrice));
         labelTextFieldList.add(new LabelTextField("颜      色:", carInformation.getColor(), carInformation::setColor));
+        labelTextFieldList.add(new LabelTextField("详      情:", carInformation.getInformation(), carInformation::setInformation));
 
         return labelTextFieldList;
     }

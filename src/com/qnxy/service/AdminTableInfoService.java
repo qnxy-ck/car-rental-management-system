@@ -7,6 +7,7 @@ import com.qnxy.jdbc.UpdateSpace;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,12 +41,13 @@ public class AdminTableInfoService {
     public boolean addAdminTableInfo(CarInformation carInformation) {
         try {
             return new UpdateSpace()
-                    .sql("insert into car_information(car_type, car_renters, price, color) value (?, ?, ?, ?)")
+                    .sql("insert into car_information(car_type, car_renters, price, color, information) value (?, ?, ?, ?, ?)")
                     .params(
                             carInformation.getCarType(),
                             carInformation.getCarRenters(),
                             carInformation.getPrice(),
-                            carInformation.getColor()
+                            carInformation.getColor(),
+                            carInformation.getInformation()
                     )
                     .update() > 0;
         } catch (SQLException e) {
@@ -82,4 +84,69 @@ public class AdminTableInfoService {
     }
 
 
+    public boolean deleteById(Integer id) {
+        try {
+            return new UpdateSpace()
+                    .sql("delete from car_information where id = ?")
+                    .params(id)
+                    .update() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+
+    public boolean updateById(CarInformation data) {
+        final StringBuilder updateSql = new StringBuilder();
+        List<String> sqlPart = new ArrayList<>();
+        final UpdateSpace updateSpace = new UpdateSpace();
+
+        updateSql.append("update car_information");
+
+        if (data.getCarType() != null && !data.getCarType().isEmpty()) {
+            sqlPart.add(" car_type = ?");
+            updateSpace.param(data.getCarType());
+        }
+
+        if (data.getCarRenters() != null && !data.getCarRenters().isEmpty()) {
+            sqlPart.add(" car_renters = ?");
+            updateSpace.param(data.getCarRenters());
+        }
+
+        if (data.getPrice() != null && !data.getPrice().isEmpty()) {
+            sqlPart.add(" price = ?");
+            updateSpace.param(data.getPrice());
+        }
+
+        if (data.getColor() != null && !data.getColor().isEmpty()) {
+            sqlPart.add(" color = ?");
+            updateSpace.param(data.getColor());
+        }
+
+        if (data.getInformation() != null && !data.getInformation().isEmpty()) {
+            sqlPart.add(" information = ?");
+            updateSpace.param(data.getInformation());
+        }
+
+
+        if (sqlPart.isEmpty()) {
+            return true;
+        }
+
+        updateSql.append(" set")
+                .append(
+                        String.join(" , ", sqlPart)
+                )
+                .append(" where id = ?");
+
+        updateSpace.param(data.getId());
+
+        try {
+            return updateSpace.sql(updateSql.toString())
+                    .update() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+
+    }
 }

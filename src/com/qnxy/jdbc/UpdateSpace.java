@@ -42,7 +42,10 @@ public class UpdateSpace {
             ps.setObject(i + 1, this.paramList.get(i));
         }
 
-        return ps.executeUpdate();
+        int i = ps.executeUpdate();
+
+        Utils.closeAction(connection, ps, null);
+        return i;
     }
 
 }

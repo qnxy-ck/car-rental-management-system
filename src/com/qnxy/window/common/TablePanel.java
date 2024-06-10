@@ -3,8 +3,6 @@ package com.qnxy.window.common;
 import com.qnxy.common.data.PageInfo;
 import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.TableCellOperate;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -18,7 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
@@ -71,11 +68,12 @@ public final class TablePanel<T> extends JPanel {
      * 初始化表格自定义操作
      */
     private void initCellOperate() {
-        final TableColumnModel columnModel = this.table.getColumnModel();
 
         IntStream.range(0, this.tableHeaderDataList.size()).forEach(i -> {
-            final Supplier<? extends TableCellOperate<T, ?>> cellOperateSupplier = tableHeaderDataList.get(i).cellOperateSupplier;
+            final Supplier<? extends TableCellOperate<T, ?>> cellOperateSupplier = tableHeaderDataList.get(i).getCellOperateSupplier();
             if (cellOperateSupplier != null) {
+                final TableColumnModel columnModel = this.table.getColumnModel();
+
                 final TableColumn column = columnModel.getColumn(i);
                 final TableCellOperate<T, ?> tableCellOperate = cellOperateSupplier.get();
 
@@ -125,7 +123,7 @@ public final class TablePanel<T> extends JPanel {
             final JPanel leftPanel = new JPanel();
             final JPanel rightPanel = new JPanel();
 
-            final JLabel label = new JLabel("By: ck - qnxy1997@gmail.com", SwingConstants.CENTER);
+            final JLabel label = new JLabel("By: cpdd", SwingConstants.CENTER);
             label.setFont(new Font("宋体", Font.ITALIC, 17));
             label.setPreferredSize(new Dimension(260, 30));
             label.setForeground(new Color(110, 83, 80, 255));
@@ -144,7 +142,7 @@ public final class TablePanel<T> extends JPanel {
     }
 
 
-    private void invokeDataGetFun(DataInitType dataInitType) {
+    public void invokeDataGetFun(DataInitType dataInitType) {
         final Integer currentPage = Optional.ofNullable(this.pageInfo)
                 .map(PageInfo::getCurrentPage)
                 .orElse(1);
@@ -162,7 +160,9 @@ public final class TablePanel<T> extends JPanel {
     public void refreshTableData(PageInfo<T> pageInfo) {
         this.bottomLabelJLabelMap.forEach((label, consumer) -> consumer.accept(label, pageInfo));
         this.pageInfo = pageInfo;
+
         table.updateUI();
+//        EventQueue.invokeLater(table::updateUI);
     }
 
     /**
@@ -186,28 +186,6 @@ public final class TablePanel<T> extends JPanel {
 
     }
 
-    /**
-     * 表格表头数据和对应数据初始化方式
-     * <p>
-     * 如果表头中需要添加自定义按钮, 则 Function<T, Object> tableValueFunction 中 Object 类应实现 {@link TableCellOperate} 类
-     *
-     * @param <T>
-     */
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class NameAndValue<T> {
-        private final String tableTitle;
-        private final Function<T, Object> valueGetFun;
-        private final Supplier<TableCellOperate<T, ?>> cellOperateSupplier;
-
-        public static <T> NameAndValue<T> of(String tableTitle, Function<T, Object> valueGetFun) {
-            return new NameAndValue<>(tableTitle, valueGetFun, null);
-        }
-
-        public static <T> NameAndValue<T> of(String tableTitle, Supplier<TableCellOperate<T, ?>> cellOperateSupplier) {
-            return new NameAndValue<>(tableTitle, null, cellOperateSupplier);
-        }
-
-    }
 
     /**
      * 自定义 TableModel
@@ -232,7 +210,7 @@ public final class TablePanel<T> extends JPanel {
             return TablePanel.this
                     .tableHeaderDataList
                     .get(column)
-                    .tableTitle;
+                    .getTableTitle();
         }
 
 
@@ -249,12 +227,13 @@ public final class TablePanel<T> extends JPanel {
 
             final T t = TablePanel.this.pageInfo.getRecords().get(rowIndex);
 
-            return Optional.ofNullable(TablePanel.this.tableHeaderDataList.get(columnIndex).valueGetFun)
+            return Optional.ofNullable(TablePanel.this.tableHeaderDataList.get(columnIndex).getValueGetFun())
                     .map(it -> it.apply(t))
                     .orElse(t);
         }
 
     }
+
 
 }
 

@@ -8,23 +8,24 @@ import com.qnxy.window.QuickListenerAdder;
 import com.qnxy.window.SetInputValueDocumentListener;
 import com.qnxy.window.TableCellOperate;
 import com.qnxy.window.common.LogoutPanel;
+import com.qnxy.window.common.NameAndValue;
 import com.qnxy.window.common.RentalTableDetailsDialog;
 import com.qnxy.window.common.TablePanel;
-import com.qnxy.window.common.TablePanel.NameAndValue;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  * 管理员窗口
  *
  * @author Qnxy
  */
+@Slf4j
 public final class AdministratorPanel extends ChildPanelSupport
         implements BiFunction<Integer, TablePanel.DataInitType, PageInfo<CarInformation>> {
 
@@ -38,7 +39,10 @@ public final class AdministratorPanel extends ChildPanelSupport
         add(NameAndValue.of("价格(元/天)", CarInformation::getPrice));
         add(NameAndValue.of("颜色", CarInformation::getColor));
         add(NameAndValue.of("是否被租用", it -> it.getUid() != null ? "是" : "否"));
-        add(NameAndValue.of("租用的用户", CarInformation::getUid));
+        add(NameAndValue.of("租用的用户", it -> {
+            Integer uid = it.getUid();
+            return uid == null ? "" : uid;
+        }));
         add(NameAndValue.of("操作", AdminTableOpt::new));
     }};
     // 当前面板表格
@@ -157,7 +161,7 @@ public final class AdministratorPanel extends ChildPanelSupport
                 id = Integer.parseInt(this.inputValue);
             }
         } catch (NumberFormatException e) {
-            // tishi
+            // ignore
         }
         PageInfo<CarInformation> carInformationPageInfo = this.adminTableInfoService.selectTableInfo(id, currentPage);
 
@@ -169,15 +173,6 @@ public final class AdministratorPanel extends ChildPanelSupport
         }
     }
 
-    @RequiredArgsConstructor
-    @Getter
-    private enum AdminTableOptAction implements TableCellOperate.ActionName {
-        UPDATE("更新"),
-        DELETE("删除"),
-        DETAILS("详情");
-
-        private final String actionName;
-    }
 
     private class AdminTableOpt extends TableCellOperate<CarInformation, AdminTableOptAction> {
 
@@ -189,23 +184,41 @@ public final class AdministratorPanel extends ChildPanelSupport
         public void execActionByType(AdminTableOptAction actionType, CarInformation data) {
             switch (actionType) {
                 case DELETE:
-                    JOptionPane.showMessageDialog(AdministratorPanel.this, actionType.getActionName() + "开发中");
-                    break;
+                    successOrErr(() -> adminTableInfoService.deleteById(data.getId()), "删除成功", "删除失败!");
+                    return;
                 case DETAILS:
-                    new RentalTableDetailsDialog(((JFrame) getRootPane().getParent()), data.toString(), it -> System.out.println("输入内容为: \n" + it));
-                    break;
+                    new RentalTableDetailsDialog(
+                            (JFrame) getRootPane().getParent(),
+                            data.getInformation(),
+                            it -> {
+                                final CarInformation carInformation = new CarInformation()
+                                        .setId(data.getId())
+                                        .setInformation(it);
+                                return successOrErr(() -> adminTableInfoService.updateById(carInformation), "更新详情成功", "更新详情失败");
+                            }
+                    );
+                    return;
                 case UPDATE:
                     new InformationEntryDialog(
                             ((Frame) getRootPane().getParent()),
                             data,
-                            it -> {
-                                JOptionPane.showMessageDialog(null, "更新成功");
-                                return true;
-                            }
+                            it -> successOrErr(() -> adminTableInfoService.updateById(it), "更新成功", "更新失败")
                     );
             }
 
         }
-    }
 
+        public Boolean successOrErr(Supplier<Boolean> exe, String sucMsg, String errMsg) {
+            Boolean flag = exe.get();
+            JOptionPane.showMessageDialog(
+                    AdministratorPanel.this,
+                    flag ? sucMsg : errMsg
+            );
+
+            AdministratorPanel.this.dataTablePanel.refreshTableData(getData(1));
+            return flag;
+
+        }
+
+    }
 }

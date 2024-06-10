@@ -6,7 +6,7 @@ import com.qnxy.window.SetInputValueDocumentListener;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 车辆租用详细内容提示框
@@ -32,7 +32,7 @@ public final class RentalTableDetailsDialog extends JDialog {
      * 提交事件
      * 管理员使用, 管理员时不可为空
      */
-    private final Consumer<String> submitAction;
+    private final Function<String, Boolean> submitAction;
 
     /**
      * 文本框每次修改时的值, 非管理员使用时和 initTextAreaValue 值相同
@@ -57,7 +57,7 @@ public final class RentalTableDetailsDialog extends JDialog {
      * @param text         展示内容
      * @param submitAction 提交事件, 不可为 null
      */
-    public RentalTableDetailsDialog(JFrame root, String text, Consumer<String> submitAction) {
+    public RentalTableDetailsDialog(JFrame root, String text, Function<String, Boolean> submitAction) {
         super(root);
         this.isAdmin = submitAction != null;
         this.submitAction = submitAction;
@@ -135,7 +135,9 @@ public final class RentalTableDetailsDialog extends JDialog {
      */
     private void submitAction() {
         if (!this.textAreaValue.equals(initTextAreaValue)) {
-            this.submitAction.accept(textAreaValue);
+            if (this.submitAction.apply(textAreaValue)) {
+                dispose();
+            }
         }
     }
 
